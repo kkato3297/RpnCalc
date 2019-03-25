@@ -1,0 +1,4 @@
+.vs
+/test/lib/*.pdb
+/test/lib/*.lib
+/test/include/cppunit
