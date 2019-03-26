@@ -11,3 +11,15 @@ const char* StackOverflowException::what() const _NOEXCEPT
 {
     return mWhat.c_str();
 }
+
+SyntaxErrorException::SyntaxErrorException(string what)
+        : mWhat(what)
+{}
+
+SyntaxErrorException::~SyntaxErrorException(void)
+{}
+
+const char* SyntaxErrorException::what() const _NOEXCEPT
+{
+    return mWhat.c_str();
+}

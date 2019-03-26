@@ -21,7 +21,7 @@ target_compile_definitions(RpnCalc PUBLIC _UNICODE UNICODE)
 add_subdirectory ("Common")
 add_subdirectory ("Rpn")
 add_subdirectory ("In2Rpn")
-if(${TARGET_PLATFORM} STREQUAL "ANDROID")
+if(${TARGET_PLATFORM} STREQUAL "PLATFORM_ANDROID")
 	add_subdirectory ("JNI")
 endif()
 
