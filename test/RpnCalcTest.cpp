@@ -27,5 +27,8 @@ int wmain(int argc, wchar_t *argv[])
 	CPPUNIT_NS::CompilerOutputter outputter(&result, CPPUNIT_NS::stdCOut());
 	outputter.write();
 
+	// ˆêŽž’âŽ~
+	_wsystem(L"pause");
+
 	return result.wasSuccessful() ? 0 : 1;
 }
