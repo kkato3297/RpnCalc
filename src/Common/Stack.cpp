@@ -1,8 +1,13 @@
 #include <Stack.h>
 
 StackOverflowException::StackOverflowException(string what)
-: exception(what.c_str())
+        : mWhat(what)
 {}
 
 StackOverflowException::~StackOverflowException(void)
 {}
+
+const char* StackOverflowException::what() const _NOEXCEPT
+{
+    return mWhat.c_str();
+}

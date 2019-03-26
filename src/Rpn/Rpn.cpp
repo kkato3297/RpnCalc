@@ -3,11 +3,16 @@
 #include <iostream>
 
 SyntaxErrorException::SyntaxErrorException(string what)
-	: exception(what.c_str())
+		: mWhat(what)
 {}
 
 SyntaxErrorException::~SyntaxErrorException(void)
 {}
+
+const char* SyntaxErrorException::what() const _NOEXCEPT
+{
+	return mWhat.c_str();
+}
 
 Rpn::Rpn(void)
 {}

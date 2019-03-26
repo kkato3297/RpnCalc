@@ -10,9 +10,13 @@ using namespace std;
 
 class SyntaxErrorException : public exception
 {
+private:
+	string mWhat;
+
 public:
 	SyntaxErrorException(string what);
-	virtual ~SyntaxErrorException(void);
+	virtual ~SyntaxErrorException(void) override;
+	virtual const char* what() const _NOEXCEPT;
 };
 
 class Rpn
