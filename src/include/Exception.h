@@ -7,6 +7,10 @@
 
 #include <exception>
 
+#ifndef _NOEXCEPT
+#define _NOEXCEPT noexcept
+#endif
+
 using namespace std;
 
 class StackOverflowException : public exception
