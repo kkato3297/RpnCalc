@@ -1,10 +1,39 @@
 ﻿# CMakeList.txt : 最上位の CMake プロジェクト ファイル。グローバル構成を行います
 # また、サブプロジェクトをここに含めます。
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.4.1)
+
+option(TARGET_PLATFORM	"Target platform")
+option(TARGET_FORMAT	"Target format")
+
+# デフォルト値の設定
+if(${TARGET_PLATFORM} STREQUAL "WINDOWS")
+elseif(${TARGET_PLATFORM} STREQUAL "ANDROID")
+else()
+	set(TARGET_PLATFORM "WINDOWS")
+endif()
+
+# デフォルト値の設定
+if(${TARGET_FORMAT} STREQUAL "EXECUTABLE")
+elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
+elseif(${TARGET_FORMAT} STREQUAL "STATIC_LIBRARY")
+else()
+	if(${TARGET_PLATFORM} STREQUAL "WINDOWS")
+		set(TARGET_FORMAT "EXECUTABLE")
+	elseif(${TARGET_PLATFORM} STREQUAL "ANDROID")
+		set(TARGET_FORMAT "SHARED_LIBRARY")
+	endif()
+endif()
 
 project ("RpnCalc")
 
+message ("========================================")
+message ("TARGET_PLATFORM: \"${TARGET_PLATFORM}\"")
+message ("TARGET_FORMAT  : \"${TARGET_FORMAT}\"")
+message ("========================================")
+
 # サブプロジェクトを含めます。
 add_subdirectory("src")
-add_subdirectory("test")
+if(${TARGET_PLATFORM} STREQUAL "WINDOWS")
+	add_subdirectory("test")
+endif()

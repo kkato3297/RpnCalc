@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Spec.h>
 #include <Data.h>
 
 #include <string>
@@ -10,9 +11,13 @@ using namespace std;
 
 class StackOverflowException : public exception
 {
+private:
+	string mWhat;
+
 public:
 	StackOverflowException(string what);
-	virtual ~StackOverflowException(void);
+	virtual ~StackOverflowException(void) override;
+	virtual const char* what() const _NOEXCEPT;
 };
 
 template<class T>

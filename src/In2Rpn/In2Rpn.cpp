@@ -1,4 +1,4 @@
-#include <In2Rpn/In2Rpn.h>
+ï»¿#include <In2Rpn/In2Rpn.h>
 #include <Stack.h>
 #include <map>
 #include <regex>
@@ -111,10 +111,10 @@ string In2Rpn::toRpn(void)
 
 	for (auto &token : m_tokenList) {
 		if (isNumeric(token)) {
-			// ‚»‚ê‚Í”š‚©
+			// ãã‚Œã¯æ•°å­—ã‹
 			buffer.push_back(token);
 		} else if (token == ")") {
-			// ‰E‚©‚Á‚±‚©
+			// å³ã‹ã£ã“ã‹
 			string temp = stack.pop();
 			while (temp != "(") {
 				buffer.push_back(temp);
@@ -122,16 +122,16 @@ string In2Rpn::toRpn(void)
 				temp = stack.pop();
 			}
 		} else if (token == "(") {
-			// ¶‚©‚Á‚±‚©
+			// å·¦ã‹ã£ã“ã‹
 			stack.push(token);
 		} else {
-			// ƒXƒ^ƒbƒN‚Í‹ó‚©
+			// ã‚¹ã‚¿ãƒƒã‚¯ã¯ç©ºã‹
 			while (stack.length()) {
 				string temp = stack.back();
-				// ƒXƒ^ƒbƒN‚ÌÅãˆÊ‰‰Zq‚æ‚èƒg[ƒNƒ“‰‰Zq‚Ì—Dæ‡˜‚ª’á‚¢
+				// ã‚¹ã‚¿ãƒƒã‚¯ã®æœ€ä¸Šä½æ¼”ç®—å­ã‚ˆã‚Šãƒˆãƒ¼ã‚¯ãƒ³æ¼”ç®—å­ã®å„ªå…ˆé †åºãŒä½ã„
 				if (operatorOrder.find(temp) != operatorOrder.end() &&
 					operatorOrder.at(temp) > operatorOrder.at(token)) {
-					// ƒXƒ^ƒbƒN‚©‚çƒ|ƒbƒv‚µA‚»‚ê‚ğƒoƒbƒtƒ@‚Ö
+					// ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰ãƒãƒƒãƒ—ã—ã€ãã‚Œã‚’ãƒãƒƒãƒ•ã‚¡ã¸
 					buffer.push_back(stack.pop());
 				} else {
 					break;
@@ -201,13 +201,13 @@ string In2Rpn::separateToken(string &expr)
 		}
 	}
 	{
-		// ®‚Ìæ“ª‚¨‚æ‚ÑI’[‚É‘¶İ‚·‚éƒXƒy[ƒX‚ğíœ
+		// å¼ã®å…ˆé ­ãŠã‚ˆã³çµ‚ç«¯ã«å­˜åœ¨ã™ã‚‹ã‚¹ãƒšãƒ¼ã‚¹ã‚’å‰Šé™¤
 		regex re(R"(^(?:[\s]+)?([^\s].+[^\s])(?:[\s]+)?$)");
 
 		work = regex_replace(work, re, "$1");
 	}
 	{
-		// ƒg[ƒNƒ“ŠÔ‚Ì—]Œv‚ÈƒXƒy[ƒX‚ğíœ
+		// ãƒˆãƒ¼ã‚¯ãƒ³é–“ã®ä½™è¨ˆãªã‚¹ãƒšãƒ¼ã‚¹ã‚’å‰Šé™¤
 		regex re(R"(([^\s]+)(?:[\s]+))");
 
 		work = regex_replace(work, re, "$1 ");
