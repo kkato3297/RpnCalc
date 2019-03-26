@@ -130,7 +130,7 @@ string In2Rpn::toRpn(void)
 				string temp = stack.back();
 				// スタックの最上位演算子よりトークン演算子の優先順序が低い
 				if (operatorOrder.find(temp) != operatorOrder.end() &&
-					operatorOrder.at(temp) > operatorOrder.at(token)) {
+					operatorOrder.at(temp) >= operatorOrder.at(token)) {
 					// スタックからポップし、それをバッファへ
 					buffer.push_back(stack.pop());
 				} else {
