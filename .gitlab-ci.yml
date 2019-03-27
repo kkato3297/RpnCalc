@@ -1,20 +1,20 @@
 # use the official gcc image, based on debian
 # can use verions as well, like gcc5.2
 # see httpshub.docker.com_gcc
-image ubuntu16.04
+image: ubuntu:18.04
 
-build
-  stage build
+build:
+  stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
-  before_script 
+  before_script:
     - apt update && apt -y install make cmake clang llvm
-  script 
+  script:
     - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
     - cmake --build
     - ls
-  artifacts
-    paths
+  artifacts:
+    paths:
       - test/RpnCalcTest
   # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
   # cache
@@ -22,16 +22,16 @@ build
   #     - .o
 
 # run tests using the binary built before
-test
-  stage test
-  script
-    - bash runmytests.sh
+test:
+  stage: test
+  script:
+    - ./test/RpnCalcTest
 
-coverage
-  stage deploy
-  before_script
+coverage:
+  stage: deploy
+  before_script:
     - apt-get -qq update && apt-get -qq install -y make cmake clang llvm lcov
-  script
+  script:
     - ls
     - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
     - cmake --build
