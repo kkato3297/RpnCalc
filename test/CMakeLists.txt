@@ -4,6 +4,11 @@
 cmake_minimum_required (VERSION 3.8)
 
 include_directories("include" "../src/include")
+if(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
+	add_definitions("--coverage")
+	add_definitions("-fprofile-arcs")
+	add_definitions("-ftest-coverage")
+endif()
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
 add_executable (RpnCalcTest
