@@ -5,7 +5,7 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-int wmain(int argc, wchar_t *argv[])
+int main(int argc, char *argv[])
 {
 	// イベント・マネージャとテスト・コントローラを生成する
 	CPPUNIT_NS::TestResult controller;
@@ -26,9 +26,6 @@ int wmain(int argc, wchar_t *argv[])
 	// テスト結果を標準出力に吐き出す
 	CPPUNIT_NS::CompilerOutputter outputter(&result, CPPUNIT_NS::stdCOut());
 	outputter.write();
-
-	// 一時停止
-	_wsystem(L"pause");
 
 	return result.wasSuccessful() ? 0 : 1;
 }
