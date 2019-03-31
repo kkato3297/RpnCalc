@@ -32,6 +32,11 @@ map<string, int> functionOrder = {
 	{ "tan", 0x7fffffff },
 };
 
+map<string, int> constList = {
+	{ "M_PI",	0 },
+	{ "M_E",	0 }
+};
+
 bool isNumeric(string &token)
 {
 	bool bRet = false;
@@ -41,7 +46,7 @@ bool isNumeric(string &token)
 		bRet = true;
 	}
 	catch (std::invalid_argument &e) {
-		bRet = false;
+		bRet = constList.find(token) != constList.end();
 	};
 
 	return bRet;
