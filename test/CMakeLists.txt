@@ -1,13 +1,13 @@
-﻿# CMakeList.txt : RpnCalc の CMake プロジェクト。ソースを含めて、次を定義します:
+# CMakeList.txt : RpnCalc の CMake プロジェクト。ソースを含めて、次を定義します:
 # プロジェクト専用ロジックはこちらです。
 #
 cmake_minimum_required (VERSION 3.8)
 
 include_directories("include" "../src/include")
 if(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
-	add_definitions("--coverage")
 	add_definitions("-fprofile-arcs")
 	add_definitions("-ftest-coverage")
+	set(CMAKE_EXE_LINKER_FLAGS "--coverage")
 endif()
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
