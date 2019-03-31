@@ -8,7 +8,7 @@ using namespace std;
 class In2Rpn
 {
 public:
-	In2Rpn(string &expr);
+	In2Rpn(const string &expr);
 	virtual ~In2Rpn(void);
 
 	string toRpn(void);

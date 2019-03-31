@@ -1,4 +1,4 @@
-﻿#include <In2Rpn/In2Rpn.h>
+#include <In2Rpn/In2Rpn.h>
 #include <Stack.h>
 #include <map>
 #include <regex>
@@ -80,7 +80,7 @@ string escape(const string &str)
 	return regex_replace(str, re, "\\$1");
 }
 
-In2Rpn::In2Rpn(string &expr)
+In2Rpn::In2Rpn(const string &expr)
 {
 	string work;
 
