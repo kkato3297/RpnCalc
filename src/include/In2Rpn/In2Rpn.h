@@ -14,7 +14,7 @@ public:
 	string toRpn(void);
 
 private:
-	string separateToken(string &expr);
+	string separateToken(const string &expr);
 
 private:
 	vector<string> m_tokenList;

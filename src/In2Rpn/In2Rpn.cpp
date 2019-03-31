@@ -149,7 +149,7 @@ string In2Rpn::toRpn(void)
 	return join(buffer, " ");
 }
 
-string In2Rpn::separateToken(string &expr)
+string In2Rpn::separateToken(const string &expr)
 {
 	string work = expr;
 
