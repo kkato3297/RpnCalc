@@ -10,7 +10,7 @@ build:
   before_script:
     - apt update && apt -y install make cmake clang-7 llvm-7
   script:
-    - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
+    - CMAKE_CXX_COMPILER=clang cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
     - cmake --build
     - ls
   artifacts:
@@ -37,7 +37,7 @@ coverage:
     - apt-get -qq update && apt-get -qq install -y make cmake clang-7 llvm-7 lcov
   script:
     - ls
-    - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
+    - CMAKE_CXX_COMPILER=clang cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST
     - cmake --build
     - ./test/RpnCalcTest
     - ls
