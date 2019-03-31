@@ -45,7 +45,7 @@ coverage:
     - echo "#!/bin/bash" > ./llvm-gcov.sh
     - echo "exec llvm-cov gcov \"$@\"" >> ./llvm-gcov.sh
     - chmod +x ./llvm-gcov.sh
-    - lcov --directory . --gcov-tool llvm-gcov.sh --capture --output-file coverage.info
+    - lcov --directory . --gcov-tool ./llvm-gcov.sh --capture --output-file coverage.info
     - lcov --list coverage.info
     - genhtml -o output coverage.info
   tags:
