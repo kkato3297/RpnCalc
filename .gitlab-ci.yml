@@ -43,7 +43,7 @@ coverage:
     - ls
     - llvm-cov-7 gcov -o test/CMakeFiles/RpnCalcTest.dir/__/src/**/*.cpp.gcno src/**/*.cpp
     - echo "#!/bin/bash" > ./llvm-gcov.sh
-    - echo "exec llvm-cov-7 gcov \"$@\"" >> ./llvm-gcov.sh
+    - echo "exec llvm-cov-7 gcov \"\$\@\"" >> ./llvm-gcov.sh
     - chmod +x ./llvm-gcov.sh
     - lcov --directory . --base-directory . --gcov-tool ./llvm-gcov.sh --capture --output-file coverage.info
     - lcov --list coverage.info
