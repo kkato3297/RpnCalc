@@ -41,7 +41,7 @@ coverage:
     - cmake --build .
     - ./test/RpnCalcTest
     - ls
-    - llvm-cov-7 gcov -o test/CMakeFiles/RpnCalcTest.dir/__/src/**/*.cpp.gcno src/Common/Exception.cpp src/In2Rpn/In2Rpn.cpp
+    - llvm-cov-7 gcov -o test/CMakeFiles/RpnCalcTest.dir/__/src/**/*.cpp.gcno src/**/*.cpp
     - echo "#!/bin/bash" > ./llvm-gcov.sh
     - echo "exec llvm-cov-7 gcov \"$@\"" >> ./llvm-gcov.sh
     - chmod +x ./llvm-gcov.sh
