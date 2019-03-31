@@ -41,7 +41,7 @@ coverage:
     - cmake --build .
     - ./test/RpnCalcTest
     - ls
-    - llvm-cov-7 gcov -b src/Common/Exception.cpp -b src/In2Rpn/In2Rpn.cpp -o test/CMakeFiles/RpnCalcTest.dir/
+    - llvm-cov-7 gcov -o test/CMakeFiles/RpnCalcTest.dir/ src/Common/Exception.cpp src/In2Rpn/In2Rpn.cpp
     - lcov --directory . --capture --output-file coverage.info
     - lcov --list coverage.info
   tags:
