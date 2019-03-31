@@ -8,10 +8,10 @@ build:
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-    - apt update && apt -y install make cmake clang-7 llvm-7
+    - apt update && apt -y install make cmake clang-7 llvm-7 libcppunit-1.14-0 libcppunit-dev
   script:
     - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST -DCMAKE_CXX_COMPILER="$(which clang++-7)"
-    - cmake --build
+    - cmake --build .
     - ls
   artifacts:
     paths:
@@ -34,11 +34,11 @@ test:
 coverage:
   stage: deploy
   before_script:
-    - apt-get -qq update && apt-get -qq install -y make cmake clang-7 llvm-7 lcov
+    - apt-get -qq update && apt-get -qq install -y make cmake clang-7 llvm-7 lcov libcppunit-1.14-0 libcppunit-dev
   script:
     - ls
     - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST -DCMAKE_CXX_COMPILER="$(which clang++-7)"
-    - cmake --build
+    - cmake --build .
     - ./test/RpnCalcTest
     - ls
     - llvm-cov src/Common/Exception.cpp src/In2Rpn/In2Rpn.cpp
