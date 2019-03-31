@@ -16,6 +16,8 @@ build:
   artifacts:
     paths:
       - test/RpnCalcTest
+  tags:
+    - docker
   # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
   # cache
   #   paths
@@ -26,6 +28,8 @@ test:
   stage: test
   script:
     - ./test/RpnCalcTest
+  tags:
+    - docker
 
 coverage:
   stage: deploy
@@ -40,3 +44,5 @@ coverage:
     - llvm-cov src/Common/Exception.cpp src/In2Rpn/In2Rpn.cpp
     - lcov --directory . --capture --output-file coverage.info
     - lcov --list coverage.info
+  tags:
+    - docker
