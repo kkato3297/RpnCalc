@@ -5,7 +5,7 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 
-int wmain(int argc, wchar_t *argv[])
+int main(int argc, char *argv[])
 {
 	// イベント・マネージャとテスト・コントローラを生成する
 	CPPUNIT_NS::TestResult controller;
