@@ -21,7 +21,7 @@ private:
 public:
 	StackOverflowException(string what);
 	virtual ~StackOverflowException(void) override;
-	virtual const char* what() const _NOEXCEPT;
+	virtual const char* what() const _NOEXCEPT override;
 };
 
 class SyntaxErrorException : public exception
@@ -32,7 +32,7 @@ private:
 public:
 	SyntaxErrorException(string what);
 	virtual ~SyntaxErrorException(void) override;
-	virtual const char* what() const _NOEXCEPT;
+	virtual const char* what() const _NOEXCEPT override;
 };
 
 #endif //CALCULATOR_EXCEPTION_H
