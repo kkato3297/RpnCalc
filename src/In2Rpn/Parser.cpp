@@ -3,6 +3,7 @@
 //
 
 #include "Parser.h"
+#include <Exception.h>
 #include <map>
 
 IExpressionNode::IExpressionNode(void)
@@ -624,7 +625,7 @@ string TokenReader::next(void)
 {
 	string data = m_token->getToken();
 	if (m_token->getType() == Error) {
-		throw std::runtime_error("unexpected token : " + data);
+		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
 	return data;
@@ -634,7 +635,7 @@ string TokenReader::next(const string &&token)
 {
 	string data = m_token->getToken();
 	if (data != token || m_token->getType() == Error) {
-		throw std::runtime_error("unexpected token : " + data);
+		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
 	return data;
@@ -644,7 +645,7 @@ string TokenReader::next(const TokenType type)
 {
 	string data = m_token->getToken();
 	if (m_token->getType() != type || m_token->getType() == Error) {
-		throw std::runtime_error("unexpected token : " + data);
+		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
 	return data;
@@ -744,7 +745,7 @@ shared_ptr<IExpressionNode> Parser::parseTermExpression(void)
 	} else if (m_tr->is("(")) {
 		en = parseParenExpression();
 	} else {
-		throw runtime_error("unexpected token : " + m_tr->peek());
+		throw SyntaxErrorException("unexpected token : " + m_tr->peek());
 	}
 
 	return en;
