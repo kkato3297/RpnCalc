@@ -345,6 +345,15 @@ public:
 	};
 };
 
+class Expression_Inverse : public IExpression {
+public:
+	virtual void interpret(Stack<Number> &stack) {
+		Number a = stack.pop();
+
+		stack.push(pow(a, -1));
+	};
+};
+
 class Expression_Rand : public IExpression {
 public:
 	virtual void interpret(Stack<Number> &stack) {
@@ -395,6 +404,7 @@ static map<string, shared_ptr<IExpression>> s_operatorTable = {
 	{ "%",			make_shared<Expression_Percent>()		},
 	{ "square",		make_shared<Expression_Square>()		},
 	{ "cube",		make_shared<Expression_Cube>()			},
+    { "inverse",	make_shared<Expression_Inverse>()		},
 };
 
 static map<string, shared_ptr<IExpression>> s_functionTable = {

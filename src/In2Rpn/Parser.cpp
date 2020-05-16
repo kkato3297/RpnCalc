@@ -513,6 +513,8 @@ const map<string, TOKEN_DESCRIPTOR> operatorOrder = {
 	{ "^",			{ 2,  false }			},
 	{ "square",		{ 2,  false }			},
 	{ "cube",		{ 2,  false }			},
+	{ "inverse",	{ 2,  false }			},
+	{ "%",			{ 2,  false }			},
 	{ "!",			{ 1,  false }			},
 	// paren
 	{ "(",			{ -1, false }			},
@@ -698,7 +700,7 @@ shared_ptr<IExpressionNode> Parser::parseExpression(void)
 shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
 {
 	/*
-	 * <unary> := [ ( `+` | `-` ) ] <term> [ `!` | `square` | `cube` ];
+	 * <unary> := [ ( `+` | `-` ) ] <term>;
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
@@ -715,14 +717,6 @@ shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
 
 	if (!en) {
 		en = parseTermExpression();
-
-		if (m_tr->is("!") || m_tr->is("square") || m_tr->is("cube")) {
-			auto node = make_shared<UnaryExpressionNode>();
-			auto op = m_tr->next(Operator);
-			node->setOperator(op);
-			node->setRhs(en);
-			en = static_pointer_cast<IExpressionNode>(node);
-		}
 	}
 
 	return en;
@@ -731,7 +725,7 @@ shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
 shared_ptr<IExpressionNode> Parser::parseTermExpression(void)
 {
 	/*
-	 * <term> := ( <function> | <identifier> | <number> | `(` <expression> `)` )
+	 * <term> := ( <function> | <identifier> | <number> | `(` <expression> `)` ) [ `!` | `square` | `cube` | `inverse` ];
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
@@ -746,6 +740,15 @@ shared_ptr<IExpressionNode> Parser::parseTermExpression(void)
 		en = parseParenExpression();
 	} else {
 		throw SyntaxErrorException("unexpected token : " + m_tr->peek());
+	}
+	
+	// 右辺修飾演算子
+	if (m_tr->is("!") || m_tr->is("square") || m_tr->is("cube") || m_tr->is("inverse") || m_tr->is("%")) {
+		auto node = make_shared<UnaryExpressionNode>();
+		auto op = m_tr->next(Operator);
+		node->setOperator(op);
+		node->setRhs(en);
+		en = static_pointer_cast<IExpressionNode>(node);
 	}
 
 	return en;

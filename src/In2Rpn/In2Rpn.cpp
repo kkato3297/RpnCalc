@@ -11,44 +11,46 @@
 #endif
 
 const map<string, int> operatorOrder = {
-	{ "+",		0			},
-	{ "-",		0			},
-	{ "*",		1			},
-	{ "/",		1			},
-	{ "^",		2			},
-	{ "square",	2			},
-	{ "cube",	2			},
-	{ "!",		1			},
-	{ "abs",	0x7fffffff	},
-	{ "sin",	0x7fffffff	},
-	{ "cos",	0x7fffffff	},
-	{ "tan",	0x7fffffff	},
-	{ "sinh",	0x7fffffff	},
-	{ "cosh",	0x7fffffff	},
-	{ "tanh",	0x7fffffff	},
-	{ "asin",	0x7fffffff	},
-	{ "acos",	0x7fffffff	},
-	{ "atan",	0x7fffffff	},
-	{ "asinh",	0x7fffffff	},
-	{ "acosh",	0x7fffffff	},
-	{ "atanh",	0x7fffffff	},
-	{ "LCM",	0x7fffffff	},
-	{ "GCD",	0x7fffffff	},
-	{ "sqrt",	0x7fffffff	},
-	{ "cbrt",	0x7fffffff	},
-	{ "Rand",	0x7fffffff	},
-	{ "iRand",	0x7fffffff	},
+	{ "+",			0			},
+	{ "-",			0			},
+	{ "*",			1			},
+	{ "/",			1			},
+	{ "^",			2			},
+	{ "square",		2			},
+	{ "cube",		2			},
+	{ "inverse",	2			},
+	{ "%",			2			},
+	{ "!",			1			},
+	{ "abs",		0x7fffffff	},
+	{ "sin",		0x7fffffff	},
+	{ "cos",		0x7fffffff	},
+	{ "tan",		0x7fffffff	},
+	{ "sinh",		0x7fffffff	},
+	{ "cosh",		0x7fffffff	},
+	{ "tanh",		0x7fffffff	},
+	{ "asin",		0x7fffffff	},
+	{ "acos",		0x7fffffff	},
+	{ "atan",		0x7fffffff	},
+	{ "asinh",		0x7fffffff	},
+	{ "acosh",		0x7fffffff	},
+	{ "atanh",		0x7fffffff	},
+	{ "LCM",		0x7fffffff	},
+	{ "GCD",		0x7fffffff	},
+	{ "sqrt",		0x7fffffff	},
+	{ "cbrt",		0x7fffffff	},
+	{ "Rand",		0x7fffffff	},
+	{ "iRand",		0x7fffffff	},
 };
 
 map<string, int> functionOrder = {
-	{ "sin", 0x7fffffff },
-	{ "cos", 0x7fffffff },
-	{ "tan", 0x7fffffff },
+	{ "sin", 		0x7fffffff	},
+	{ "cos", 		0x7fffffff	},
+	{ "tan", 		0x7fffffff	},
 };
 
 map<string, int> constList = {
-	{ "M_PI",	0 },
-	{ "M_E",	0 }
+	{ "M_PI",		0			},
+	{ "M_E",		0			}
 };
 
 bool isNumeric(string &token)
@@ -185,6 +187,9 @@ string In2Rpn::separateToken(const string &expr)
 		for (auto &key : operatorOrder) {
 			tokenlist.push_back(escape(key.first));
 		}
+        for (auto &key : constList) {
+            tokenlist.push_back(escape(key.first));
+        }
 		tokenlist.push_back(escape("("));
 		tokenlist.push_back(escape(")"));
 		tokenlist.push_back(escape(","));
