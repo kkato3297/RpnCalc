@@ -6,11 +6,19 @@
 
 #include <iostream>
 
+#if 1
+#include "Parser.h"
+#endif
+
 const map<string, int> operatorOrder = {
 	{ "+",		0			},
 	{ "-",		0			},
 	{ "*",		1			},
 	{ "/",		1			},
+	{ "^",		2			},
+	{ "square",	2			},
+	{ "cube",	2			},
+	{ "!",		1			},
 	{ "abs",	0x7fffffff	},
 	{ "sin",	0x7fffffff	},
 	{ "cos",	0x7fffffff	},
@@ -24,6 +32,12 @@ const map<string, int> operatorOrder = {
 	{ "asinh",	0x7fffffff	},
 	{ "acosh",	0x7fffffff	},
 	{ "atanh",	0x7fffffff	},
+	{ "LCM",	0x7fffffff	},
+	{ "GCD",	0x7fffffff	},
+	{ "sqrt",	0x7fffffff	},
+	{ "cbrt",	0x7fffffff	},
+	{ "Rand",	0x7fffffff	},
+	{ "iRand",	0x7fffffff	},
 };
 
 map<string, int> functionOrder = {
@@ -114,6 +128,7 @@ string In2Rpn::toRpn(void)
 	Stack<string> stack;
 	vector<string> buffer;
 
+#if 0
 	for (auto &token : m_tokenList) {
 		if (isNumeric(token)) {
 			// それは数字か
@@ -146,6 +161,12 @@ string In2Rpn::toRpn(void)
 			stack.push(token);
 		}
 	}
+#else
+	Parser parser;
+	Tree& tree = parser.parse(m_tokenList);
+	string expr = tree.getRootNode()->toString();
+	return expr;
+#endif
 
 	while (stack.length()) {
 		buffer.push_back(stack.pop());
@@ -166,6 +187,7 @@ string In2Rpn::separateToken(const string &expr)
 		}
 		tokenlist.push_back(escape("("));
 		tokenlist.push_back(escape(")"));
+		tokenlist.push_back(escape(","));
 		sort(tokenlist.begin(), tokenlist.end(), [](const string &a, const string &b) {
 			return a.size() > b.size();
 		});

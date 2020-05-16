@@ -1,7 +1,7 @@
 # CMakeList.txt : RpnCalc の CMake プロジェクト。ソースを含めて、次を定義します:
 # プロジェクト専用ロジックはこちらです。
 #
-cmake_minimum_required (VERSION 3.4.1)
+cmake_minimum_required (VERSION 3.10.2)
 
 include_directories("include")
 add_definitions("-DTARGET_PLATFORM=${TARGET_PLATFORM}")

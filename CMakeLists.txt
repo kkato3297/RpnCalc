@@ -1,7 +1,7 @@
-﻿# CMakeList.txt : 最上位の CMake プロジェクト ファイル。グローバル構成を行います
+# CMakeList.txt : 最上位の CMake プロジェクト ファイル。グローバル構成を行います
 # また、サブプロジェクトをここに含めます。
 #
-cmake_minimum_required (VERSION 3.4.1)
+cmake_minimum_required (VERSION 3.10.2)
 
 option(TARGET_PLATFORM	"Target platform")
 option(TARGET_FORMAT	"Target format")
@@ -10,6 +10,7 @@ option(TARGET_FORMAT	"Target format")
 if(${TARGET_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
 elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_ANDROID")
 elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
+elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_IOS")
 else()
 	set(TARGET_PLATFORM "PLATFORM_WINDOWS")
 endif()
@@ -27,7 +28,8 @@ else()
 	endif()
 endif()
 
-project ("RpnCalc")
+set(CMAKE_CXX_STANDARD 17)
+project ("RpnCalc" CXX)
 
 message ("========================================")
 message ("TARGET_PLATFORM: \"${TARGET_PLATFORM}\"")

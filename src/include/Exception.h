@@ -13,6 +13,22 @@
 
 using namespace std;
 
+#if TARGET_PLATFORM == PLATFORM_IOS
+class ExceptionCollection
+{
+private:
+	std::exception *mException;
+
+	ExceptionCollection(void);
+	~ExceptionCollection(void);
+
+public:
+	static ExceptionCollection &getInstance(void);
+	void setException(std::exception *exception);
+	std::exception *getException(void);
+};
+#endif
+
 class StackOverflowException : public exception
 {
 private:
@@ -21,7 +37,7 @@ private:
 public:
 	StackOverflowException(string what);
 	virtual ~StackOverflowException(void) override;
-	virtual const char* what() const _NOEXCEPT;
+	virtual const char* what() const _NOEXCEPT override;
 };
 
 class SyntaxErrorException : public exception
@@ -32,7 +48,7 @@ private:
 public:
 	SyntaxErrorException(string what);
 	virtual ~SyntaxErrorException(void) override;
-	virtual const char* what() const _NOEXCEPT;
+	virtual const char* what() const _NOEXCEPT override;
 };
 
 #endif //CALCULATOR_EXCEPTION_H
