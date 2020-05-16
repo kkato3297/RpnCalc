@@ -13,6 +13,22 @@
 
 using namespace std;
 
+#if TARGET_PLATFORM == PLATFORM_IOS
+class ExceptionCollection
+{
+private:
+	std::exception *mException;
+
+	ExceptionCollection(void);
+	~ExceptionCollection(void);
+
+public:
+	static ExceptionCollection &getInstance(void);
+	void setException(std::exception *exception);
+	std::exception *getException(void);
+};
+#endif
+
 class StackOverflowException : public exception
 {
 private:
