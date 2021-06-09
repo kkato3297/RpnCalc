@@ -19,8 +19,22 @@ cmake \
     -DTARGET_PLATFORM=PLATFORM_IOS \
     -DTARGET_FORMAT=STATIC_LIBRARY \
     -DCMAKE_SYSTEM_NAME=iOS \
-    -DCMAKE_IOS_SDK_ROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.4.sdk \
+    -DCMAKE_IOS_SDK_ROOT=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.4.sdk \
     ..
+```
+
+Build
+```
+xcodebuild \
+    -project RpnCalc.xcodeproj \
+    -sdk iphonesimulator \
+    -scheme RpnCalc \
+    -configuration Release
+# xcodebuild \
+    -project RpnCalc.xcodeproj \
+    -sdk iphoneos \
+    -scheme RpnCalc \
+    -configuration Release
 ```
 
 After build
