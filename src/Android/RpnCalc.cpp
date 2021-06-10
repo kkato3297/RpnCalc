@@ -1,5 +1,5 @@
 //
-// Created by Kazuki_Kato on 2021/03/16.
+// Created by KK Systems on 2021/03/16.
 //
 
 #include "RpnCalc.h"

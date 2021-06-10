@@ -1,5 +1,5 @@
 //
-// Created by Kazuki_Kato on 2019/03/24.
+// Created by KK Systems on 2019/03/24.
 //
 
 #ifndef CALCULATOR_JNIRPNCALC_H

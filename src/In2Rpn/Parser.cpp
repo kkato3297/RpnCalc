@@ -1,5 +1,5 @@
 //
-// Created by 加藤 数基 on 2020-01-27.
+// Created by KK Systems on 2020-01-27.
 //
 
 #include "Parser.h"

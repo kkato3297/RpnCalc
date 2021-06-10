@@ -1,5 +1,5 @@
 //
-// Created by Kazuki_Kato on 2019/03/27.
+// Created by KK Systems on 2019/03/27.
 //
 
 #ifndef CALCULATOR_EXCEPTION_H
