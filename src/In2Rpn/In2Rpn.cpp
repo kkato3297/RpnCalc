@@ -65,6 +65,10 @@ bool isNumeric(string &token)
 		bRet = constList.find(token) != constList.end();
 	};
 
+	if (token == ".") {
+		bRet = true;
+	}
+
 	return bRet;
 }
 

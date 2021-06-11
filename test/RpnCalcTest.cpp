@@ -7,23 +7,23 @@
 
 int main(int argc, char *argv[])
 {
-	// ƒCƒxƒ“ƒgEƒ}ƒl[ƒWƒƒ‚ÆƒeƒXƒgEƒRƒ“ƒgƒ[ƒ‰‚ğ¶¬‚·‚é
+	// ã‚¤ãƒ™ãƒ³ãƒˆãƒ»ãƒãƒãƒ¼ã‚¸ãƒ£ã¨ãƒ†ã‚¹ãƒˆãƒ»ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ã‚’ç”Ÿæˆã™ã‚‹
 	CPPUNIT_NS::TestResult controller;
 
-	// ƒeƒXƒgŒ‹‰ÊûWƒŠƒXƒi‚ğƒRƒ“ƒgƒ[ƒ‰‚ÉƒAƒ^ƒbƒ`‚·‚é
+	// ãƒ†ã‚¹ãƒˆçµæœåé›†ãƒªã‚¹ãƒŠã‚’ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ã«ã‚¢ã‚¿ãƒƒãƒã™ã‚‹
 	CPPUNIT_NS::TestResultCollector result;
 	controller.addListener(&result);
 
-	// u.v‚Åisó‹µ‚ğo—Í‚·‚éƒŠƒXƒi‚ğƒAƒ^ƒbƒ`‚·‚é
+	// ã€Œ.ã€ã§é€²è¡ŒçŠ¶æ³ã‚’å‡ºåŠ›ã™ã‚‹ãƒªã‚¹ãƒŠã‚’ã‚¢ã‚¿ãƒƒãƒã™ã‚‹
 	CPPUNIT_NS::BriefTestProgressListener progress;
 	controller.addListener(&progress);
 
-	// ƒeƒXƒgEƒ‰ƒ“ƒi[‚ÉƒeƒXƒgŒQ‚ğ—^‚¦AƒeƒXƒg‚·‚é
+	// ãƒ†ã‚¹ãƒˆãƒ»ãƒ©ãƒ³ãƒŠãƒ¼ã«ãƒ†ã‚¹ãƒˆç¾¤ã‚’ä¸ãˆã€ãƒ†ã‚¹ãƒˆã™ã‚‹
 	CPPUNIT_NS::TestRunner runner;
 	runner.addTest(CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest());
 	runner.run(controller);
 
-	// ƒeƒXƒgŒ‹‰Ê‚ğ•W€o—Í‚É“f‚«o‚·
+	// ãƒ†ã‚¹ãƒˆçµæœã‚’æ¨™æº–å‡ºåŠ›ã«åãå‡ºã™
 	CPPUNIT_NS::CompilerOutputter outputter(&result, CPPUNIT_NS::stdCOut());
 	outputter.write();
 

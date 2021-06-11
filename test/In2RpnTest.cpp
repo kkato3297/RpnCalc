@@ -36,5 +36,20 @@ void In2RpnTest::testcase0005(void) {
 
 void In2RpnTest::testcase0006(void) {
 	In2Rpn in2rpn(string("sin M_PI"));
-	CPPUNIT_ASSERT(in2rpn.toRpn() == "M_PI sin");
+	CPPUNIT_ASSERT(in2rpn.toRpn() == "M_PI sin@1");
+}
+
+void In2RpnTest::testcase0007(void) {
+	In2Rpn in2rpn(string("."));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == ".");
+}
+
+void In2RpnTest::testcase0008(void) {
+	In2Rpn in2rpn(string("3."));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == "3.");
+}
+
+void In2RpnTest::testcase0009(void) {
+	In2Rpn in2rpn(string(".5"));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == ".5");
 }

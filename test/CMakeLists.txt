@@ -8,6 +8,12 @@ if(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
 	add_definitions("-fprofile-arcs")
 	add_definitions("-ftest-coverage")
 	set(CMAKE_EXE_LINKER_FLAGS "--coverage")
+elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_MACOS")
+	include_directories("/usr/local/include")
+	link_directories("/usr/local/opt/cppunit/lib")
+	add_definitions("-fprofile-arcs")
+	add_definitions("-ftest-coverage")
+	set(CMAKE_EXE_LINKER_FLAGS "--coverage")
 endif()
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
@@ -15,11 +21,15 @@ add_executable (RpnCalcTest
 	"RpnCalcTest.cpp"
 	"In2RpnTest.cpp"
 	"${CMAKE_SOURCE_DIR}/src/Common/Exception.cpp"
-	"${CMAKE_SOURCE_DIR}/src/In2Rpn/In2Rpn.cpp")
+	"${CMAKE_SOURCE_DIR}/src/In2Rpn/In2Rpn.cpp"
+	"${CMAKE_SOURCE_DIR}/src/In2Rpn/Parser.cpp"
+)
 
 if(${TARGET_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
 	target_link_libraries(RpnCalcTest "${CMAKE_SOURCE_DIR}/test/lib/cppunitd.lib")
 elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
+	target_link_libraries(RpnCalcTest cppunit)
+elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_MACOS")
 	target_link_libraries(RpnCalcTest cppunit)
 endif()
 target_compile_definitions(RpnCalcTest PUBLIC _UNICODE UNICODE)

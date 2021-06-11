@@ -461,6 +461,10 @@ std::shared_ptr<IExpression> getExpression(string token)
 	else if (s_memoryTable.find(token) != s_memoryTable.end()) {
 		return s_memoryTable[token];
 	}
+	else if (token == ".") {
+		Expression_Number expression_Number(0);
+		return make_shared<Expression_Number>(expression_Number);
+	}
 	else {
 		try {
 			Expression_Number expression_Number(stod(token));

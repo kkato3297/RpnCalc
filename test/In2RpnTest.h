@@ -11,6 +11,9 @@ class In2RpnTest : public CPPUNIT_NS::TestFixture {
 	CPPUNIT_TEST(testcase0004);
 	CPPUNIT_TEST(testcase0005);
 	CPPUNIT_TEST(testcase0006);
+	CPPUNIT_TEST(testcase0007);
+	CPPUNIT_TEST(testcase0008);
+	CPPUNIT_TEST(testcase0009);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,6 +27,9 @@ private:
 	void testcase0004(void);
 	void testcase0005(void);
 	void testcase0006(void);
+	void testcase0007(void);
+	void testcase0008(void);
+	void testcase0009(void);
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(In2RpnTest);
