@@ -9,7 +9,8 @@
 
 using namespace std;
 
-int wmain(int argc, wchar_t *argv[])
+// int wmain(int argc, wchar_t *argv[])
+int main(int argc, char *argv[])
 {
 	Rpn rpn;
 	string expr, command("y");

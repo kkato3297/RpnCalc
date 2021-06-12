@@ -8,13 +8,6 @@
 
 using namespace std;
 
-class SyntaxErrorException : public exception
-{
-public:
-	SyntaxErrorException(string what);
-	virtual ~SyntaxErrorException(void);
-};
-
 class Rpn
 {
 public:

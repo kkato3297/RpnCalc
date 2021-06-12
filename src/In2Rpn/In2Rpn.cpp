@@ -6,30 +6,51 @@
 
 #include <iostream>
 
+#if 1
+#include "Parser.h"
+#endif
+
 const map<string, int> operatorOrder = {
-	{ "+",		0			},
-	{ "-",		0			},
-	{ "*",		1			},
-	{ "/",		1			},
-	{ "abs",	0x7fffffff	},
-	{ "sin",	0x7fffffff	},
-	{ "cos",	0x7fffffff	},
-	{ "tan",	0x7fffffff	},
-	{ "sinh",	0x7fffffff	},
-	{ "cosh",	0x7fffffff	},
-	{ "tanh",	0x7fffffff	},
-	{ "asin",	0x7fffffff	},
-	{ "acos",	0x7fffffff	},
-	{ "atan",	0x7fffffff	},
-	{ "asinh",	0x7fffffff	},
-	{ "acosh",	0x7fffffff	},
-	{ "atanh",	0x7fffffff	},
+	{ "+",			0			},
+	{ "-",			0			},
+	{ "*",			1			},
+	{ "/",			1			},
+	{ "^",			2			},
+	{ "square",		2			},
+	{ "cube",		2			},
+	{ "inverse",	2			},
+	{ "%",			2			},
+	{ "!",			1			},
+	{ "abs",		0x7fffffff	},
+	{ "sin",		0x7fffffff	},
+	{ "cos",		0x7fffffff	},
+	{ "tan",		0x7fffffff	},
+	{ "sinh",		0x7fffffff	},
+	{ "cosh",		0x7fffffff	},
+	{ "tanh",		0x7fffffff	},
+	{ "asin",		0x7fffffff	},
+	{ "acos",		0x7fffffff	},
+	{ "atan",		0x7fffffff	},
+	{ "asinh",		0x7fffffff	},
+	{ "acosh",		0x7fffffff	},
+	{ "atanh",		0x7fffffff	},
+	{ "LCM",		0x7fffffff	},
+	{ "GCD",		0x7fffffff	},
+	{ "sqrt",		0x7fffffff	},
+	{ "cbrt",		0x7fffffff	},
+	{ "Rand",		0x7fffffff	},
+	{ "iRand",		0x7fffffff	},
 };
 
 map<string, int> functionOrder = {
-	{ "sin", 0x7fffffff },
-	{ "cos", 0x7fffffff },
-	{ "tan", 0x7fffffff },
+	{ "sin", 		0x7fffffff	},
+	{ "cos", 		0x7fffffff	},
+	{ "tan", 		0x7fffffff	},
+};
+
+map<string, int> constList = {
+	{ "M_PI",		0			},
+	{ "M_E",		0			}
 };
 
 bool isNumeric(string &token)
@@ -41,8 +62,12 @@ bool isNumeric(string &token)
 		bRet = true;
 	}
 	catch (std::invalid_argument &e) {
-		bRet = false;
+		bRet = constList.find(token) != constList.end();
 	};
+
+	if (token == ".") {
+		bRet = true;
+	}
 
 	return bRet;
 }
@@ -80,7 +105,7 @@ string escape(const string &str)
 	return regex_replace(str, re, "\\$1");
 }
 
-In2Rpn::In2Rpn(string &expr)
+In2Rpn::In2Rpn(const string &expr)
 {
 	string work;
 
@@ -109,12 +134,13 @@ string In2Rpn::toRpn(void)
 	Stack<string> stack;
 	vector<string> buffer;
 
+#if 0
 	for (auto &token : m_tokenList) {
 		if (isNumeric(token)) {
-			// ‚»‚ê‚Í”š‚©
+			// ãã‚Œã¯æ•°å­—ã‹
 			buffer.push_back(token);
 		} else if (token == ")") {
-			// ‰E‚©‚Á‚±‚©
+			// å³ã‹ã£ã“ã‹
 			string temp = stack.pop();
 			while (temp != "(") {
 				buffer.push_back(temp);
@@ -122,16 +148,16 @@ string In2Rpn::toRpn(void)
 				temp = stack.pop();
 			}
 		} else if (token == "(") {
-			// ¶‚©‚Á‚±‚©
+			// å·¦ã‹ã£ã“ã‹
 			stack.push(token);
 		} else {
-			// ƒXƒ^ƒbƒN‚Í‹ó‚©
+			// ã‚¹ã‚¿ãƒƒã‚¯ã¯ç©ºã‹
 			while (stack.length()) {
 				string temp = stack.back();
-				// ƒXƒ^ƒbƒN‚ÌÅãˆÊ‰‰Zq‚æ‚èƒg[ƒNƒ“‰‰Zq‚Ì—Dæ‡˜‚ª’á‚¢
+				// ã‚¹ã‚¿ãƒƒã‚¯ã®æœ€ä¸Šä½æ¼”ç®—å­ã‚ˆã‚Šãƒˆãƒ¼ã‚¯ãƒ³æ¼”ç®—å­ã®å„ªå…ˆé †åºãŒä½ã„
 				if (operatorOrder.find(temp) != operatorOrder.end() &&
-					operatorOrder.at(temp) > operatorOrder.at(token)) {
-					// ƒXƒ^ƒbƒN‚©‚çƒ|ƒbƒv‚µA‚»‚ê‚ğƒoƒbƒtƒ@‚Ö
+					operatorOrder.at(temp) >= operatorOrder.at(token)) {
+					// ã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰ãƒãƒƒãƒ—ã—ã€ãã‚Œã‚’ãƒãƒƒãƒ•ã‚¡ã¸
 					buffer.push_back(stack.pop());
 				} else {
 					break;
@@ -141,6 +167,12 @@ string In2Rpn::toRpn(void)
 			stack.push(token);
 		}
 	}
+#else
+	Parser parser;
+	Tree& tree = parser.parse(m_tokenList);
+	string expr = tree.getRootNode()->toString();
+	return expr;
+#endif
 
 	while (stack.length()) {
 		buffer.push_back(stack.pop());
@@ -149,7 +181,7 @@ string In2Rpn::toRpn(void)
 	return join(buffer, " ");
 }
 
-string In2Rpn::separateToken(string &expr)
+string In2Rpn::separateToken(const string &expr)
 {
 	string work = expr;
 
@@ -159,8 +191,12 @@ string In2Rpn::separateToken(string &expr)
 		for (auto &key : operatorOrder) {
 			tokenlist.push_back(escape(key.first));
 		}
+        for (auto &key : constList) {
+            tokenlist.push_back(escape(key.first));
+        }
 		tokenlist.push_back(escape("("));
 		tokenlist.push_back(escape(")"));
+		tokenlist.push_back(escape(","));
 		sort(tokenlist.begin(), tokenlist.end(), [](const string &a, const string &b) {
 			return a.size() > b.size();
 		});
@@ -201,13 +237,13 @@ string In2Rpn::separateToken(string &expr)
 		}
 	}
 	{
-		// ®‚Ìæ“ª‚¨‚æ‚ÑI’[‚É‘¶İ‚·‚éƒXƒy[ƒX‚ğíœ
+		// å¼ã®å…ˆé ­ãŠã‚ˆã³çµ‚ç«¯ã«å­˜åœ¨ã™ã‚‹ã‚¹ãƒšãƒ¼ã‚¹ã‚’å‰Šé™¤
 		regex re(R"(^(?:[\s]+)?([^\s].+[^\s])(?:[\s]+)?$)");
 
 		work = regex_replace(work, re, "$1");
 	}
 	{
-		// ƒg[ƒNƒ“ŠÔ‚Ì—]Œv‚ÈƒXƒy[ƒX‚ğíœ
+		// ãƒˆãƒ¼ã‚¯ãƒ³é–“ã®ä½™è¨ˆãªã‚¹ãƒšãƒ¼ã‚¹ã‚’å‰Šé™¤
 		regex re(R"(([^\s]+)(?:[\s]+))");
 
 		work = regex_replace(work, re, "$1 ");

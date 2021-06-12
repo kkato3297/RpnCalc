@@ -2,3 +2,9 @@
 /test/lib/*.pdb
 /test/lib/*.lib
 /test/include/cppunit
+
+# project directory used for iOS platform
+/xcode
+
+# build directory used for non-iOS platform
+/build

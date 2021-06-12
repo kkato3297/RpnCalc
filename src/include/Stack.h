@@ -1,19 +1,14 @@
 #pragma once
 
+#include <Spec.h>
 #include <Data.h>
 
 #include <string>
 #include <vector>
-#include <exception>
+
+#include <Exception.h>
 
 using namespace std;
-
-class StackOverflowException : public exception
-{
-public:
-	StackOverflowException(string what);
-	virtual ~StackOverflowException(void);
-};
 
 template<class T>
 class Stack

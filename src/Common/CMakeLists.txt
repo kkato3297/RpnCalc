@@ -1,11 +1,11 @@
-# CMakeList.txt : RpnCalc �� CMake �v���W�F�N�g�B�\�[�X���܂߂āA�����`���܂�:
-# �v���W�F�N�g��p���W�b�N�͂�����ł��B
+# CMakeList.txt : RpnCalc の CMake プロジェクト。ソースを含めて、次を定義します:
+# プロジェクト専用ロジックはこちらです。
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.4.1)
 
-# �\�[�X�����̃v���W�F�N�g�̎��s�\�t�@�C���ɒǉ����܂��B
+# ソースをこのプロジェクトの実行可能ファイルに追加します。
 target_sources (RpnCalc
 	PUBLIC
-		"Common/Stack.cpp")
+		"Common/Exception.cpp")
 
-# TODO: �e�X�g��ǉ����A�K�v�ȏꍇ�́A�^�[�Q�b�g���C���X�g�[�����܂��B
+# TODO: テストを追加し、必要な場合は、ターゲットをインストールします。

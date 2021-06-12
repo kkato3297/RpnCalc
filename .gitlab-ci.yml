@@ -1,0 +1,52 @@
+# use the official gcc image, based on debian
+# can use verions as well, like gcc5.2
+# see httpshub.docker.com_gcc
+image: ubuntu:18.04
+
+build:
+  stage: build
+  # instead of calling g++ directly you can also use some build toolkit like make
+  # install the necessary build tools when needed
+  before_script:
+    - apt update && apt -y install make cmake clang-7 llvm-7 libcppunit-1.14-0 libcppunit-dev
+  script:
+    - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST -DCMAKE_CXX_COMPILER="$(which clang++-7)"
+    - cmake --build .
+    - ls
+  artifacts:
+    paths:
+      - test/RpnCalcTest
+  tags:
+    - docker
+  # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
+  # cache
+  #   paths
+  #     - .o
+
+# run tests using the binary built before
+test:
+  stage: test
+  script:
+    - ./test/RpnCalcTest
+  tags:
+    - docker
+
+coverage:
+  stage: deploy
+  before_script:
+    - apt-get -qq update && apt-get -qq install -y make cmake clang-7 llvm-7 lcov libcppunit-1.14-0 libcppunit-dev
+  script:
+    - ls
+    - cmake -DTARGET_PLATFORM=PLATFORM_LINUX -DTARGET_FORMAT=UNITTEST -DCMAKE_CXX_COMPILER="$(which clang++-7)"
+    - cmake --build .
+    - ./test/RpnCalcTest
+    - ls
+    - llvm-cov-7 gcov -o test/CMakeFiles/RpnCalcTest.dir/__/src/**/*.cpp.gcno src/**/*.cpp
+    - echo "#!/bin/bash" > ./llvm-gcov.sh
+    - echo "exec llvm-cov-7 gcov \"\$@\"" >> ./llvm-gcov.sh
+    - chmod +x ./llvm-gcov.sh
+    - lcov --directory . --base-directory . --gcov-tool ./llvm-gcov.sh --capture --output-file coverage.info
+    - lcov --list coverage.info
+    - genhtml -o output coverage.info
+  tags:
+    - docker

@@ -2,13 +2,6 @@
 #include <regex>
 #include <iostream>
 
-SyntaxErrorException::SyntaxErrorException(string what)
-	: exception(what.c_str())
-{}
-
-SyntaxErrorException::~SyntaxErrorException(void)
-{}
-
 Rpn::Rpn(void)
 {}
 
