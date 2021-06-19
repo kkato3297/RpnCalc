@@ -9,7 +9,7 @@
 
 static Rpn rpn;
 
-std::string convIn2Rpn(std::string expr)
+std::string convIn2Rpn(const std::string &expr)
 {
 	std::string result = "";
 	std::string string = expr;
@@ -20,12 +20,17 @@ std::string convIn2Rpn(std::string expr)
 	return result;
 }
 
-double rpnExec(std::string expr)
+std::string rpnExec(const std::string &expr)
 {
-	double result = 0;
+	Number result = 0;
 	std::string string = expr;
+
+	mpfr_float::default_precision(100);
 
 	result = rpn.exec(string);
 
-	return result;
+	std::stringstream ss;
+	ss << std::setprecision(mpfr_float::default_precision()) << result;
+
+	return ss.str();
 }

@@ -8,3 +8,6 @@
 
 # build directory used for non-iOS platform
 /build
+
+# lib
+/lib
