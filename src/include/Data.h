@@ -29,6 +29,14 @@ Number operator*(const Number& value1, const Number& value2);
 
 Number operator/(const Number& value1, const Number& value2);
 
+bool operator<(const Number& value1, const Number& value2);
+
+bool operator>(const Number& value1, const Number& value2);
+
+bool operator==(const Number& value1, const Number& value2);
+
+bool operator!=(const Number& value1, const Number& value2);
+
 Number fmod(const Number& value1, const Number& value2);
 
 Number pow(const Number& value1, const Number& value2);

@@ -404,6 +404,15 @@ public:
 	};
 };
 
+static void swapFlipedValue(Number &a, Number &b) {
+	if (a > b) {
+		Number temp(b);
+
+		b = a;
+		a = temp;
+	}
+}
+
 class Expression_IRand : public IExpression {
 	using dist_type = std::uniform_int_distribution<mpz_int>;
 	static dist_type randomIntDistribution;
@@ -412,6 +421,7 @@ public:
 		Number b = stack.pop();
 		Number a = stack.pop();
 
+		swapFlipedValue(a, b);
 		mpz_int value = RandomEngine::getInstance().generateRandomInteger(mpz_int(a.str()), mpz_int(b.str()));
 
 		stack.push(value.str());

@@ -20,6 +20,22 @@ Number operator/(const Number& value1, const Number& value2) {
    return Number(static_cast<mpfr_float>(value1) / static_cast<mpfr_float>(value2));
 }
 
+bool operator<(const Number& value1, const Number& value2) {
+	return static_cast<mpfr_float>(value1) < static_cast<mpfr_float>(value2);
+}
+
+bool operator>(const Number& value1, const Number& value2) {
+	return static_cast<mpfr_float>(value1) > static_cast<mpfr_float>(value2);
+}
+
+bool operator==(const Number& value1, const Number& value2) {
+	return static_cast<mpfr_float>(value1) == static_cast<mpfr_float>(value2);
+}
+
+bool operator!=(const Number& value1, const Number& value2) {
+	return static_cast<mpfr_float>(value1) != static_cast<mpfr_float>(value2);
+}
+
 Number fmod(const Number& value1, const Number& value2) {
 	mpfr_float result = fmod(static_cast<mpfr_float>(value1), static_cast<mpfr_float>(value2));
 	return Number(result);
