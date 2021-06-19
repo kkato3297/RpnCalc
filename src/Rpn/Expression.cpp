@@ -119,7 +119,7 @@ public:
 		Number a = stack.pop();
 
 		// \Gamma(n) = (n - 1)!
-		stack.push(tgamma(a + 1));
+		stack.push(tgamma(a + Number(1)));
 	};
 };
 
@@ -128,7 +128,7 @@ public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number a = stack.pop();
 
-		stack.push(a / 100.0);
+		stack.push(a / Number(100));
 	};
 };
 
@@ -191,7 +191,7 @@ public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number a = stack.pop();
 
-		stack.push(atan2(a, 1.0));
+		stack.push(atan2(a, Number(1.0)));
 	};
 };
 
@@ -332,7 +332,7 @@ public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number a = stack.pop();
 
-		stack.push(pow(a, 2));
+		stack.push(pow(a, Number(2)));
 	};
 };
 
@@ -341,7 +341,7 @@ public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number a = stack.pop();
 
-		stack.push(pow(a, 3));
+		stack.push(pow(a, Number(3)));
 	};
 };
 
@@ -350,34 +350,85 @@ public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number a = stack.pop();
 
-		stack.push(pow(a, -1));
+		stack.push(pow(a, Number(-1)));
 	};
 };
+
+class RandomEngine {
+public:
+	using dist_type = std::uniform_int_distribution<mpz_int>;
+
+	static RandomEngine& getInstance(void) {
+		if (m_instance == nullptr) {
+			m_instance = new RandomEngine();
+		}
+		return *m_instance;
+	};
+
+	mpz_int generateRandomInteger(mpz_int a, mpz_int b) {
+		dist_type::param_type param = randomIntDistribution.param();
+
+		if (param.a() != a || param.b() != b) {
+			param = dist_type::param_type(mpz_int(a), mpz_int(b));
+			randomIntDistribution.param(param);
+		}
+
+		return randomIntDistribution(m_engine);
+	};
+
+	mpfr_float generateRandomFloat() {
+		return generate_canonical<mpfr_float, 100>(m_engine);
+	};
+
+private:
+	RandomEngine(void) {
+		std::random_device seed_gen;
+		m_engine = mt19937_64(seed_gen());
+	};
+	RandomEngine(const RandomEngine&) = delete;
+
+	std::mt19937_64 m_engine;
+
+	static dist_type randomIntDistribution;
+
+	static RandomEngine* m_instance;
+};
+
+RandomEngine* RandomEngine::m_instance = nullptr;
+RandomEngine::dist_type RandomEngine::randomIntDistribution = RandomEngine::dist_type(mpz_int(0), mpz_int(0));
 
 class Expression_Rand : public IExpression {
 public:
 	virtual void interpret(Stack<Number> &stack) {
-		std::random_device seed_gen;
-		std::mt19937 engine(seed_gen());
-		std::uniform_real_distribution<double> randomDoubleDistribution(0.0, 1.0);
-
-		stack.push(randomDoubleDistribution(engine));
+		stack.push(RandomEngine::getInstance().generateRandomFloat());
 	};
 };
 
+static void swapFlipedValue(Number &a, Number &b) {
+	if (a > b) {
+		Number temp(b);
+
+		b = a;
+		a = temp;
+	}
+}
+
 class Expression_IRand : public IExpression {
+	using dist_type = std::uniform_int_distribution<mpz_int>;
+	static dist_type randomIntDistribution;
 public:
 	virtual void interpret(Stack<Number> &stack) {
 		Number b = stack.pop();
 		Number a = stack.pop();
 
-		std::random_device seed_gen;
-		std::mt19937 engine(seed_gen());
-		std::uniform_int_distribution<int> randomIntDistribution(static_cast<int>(a), static_cast<int>(b));
+		swapFlipedValue(a, b);
+		mpz_int value = RandomEngine::getInstance().generateRandomInteger(mpz_int(a.str()), mpz_int(b.str()));
 
-		stack.push(randomIntDistribution(engine));
+		stack.push(value.str());
 	};
 };
+
+Expression_IRand::dist_type Expression_IRand::randomIntDistribution = dist_type();
 
 class Expression_Number : public IExpression {
 public:
@@ -390,6 +441,22 @@ public:
 
 private:
 	Number m_value;
+};
+
+class Expression_Constant_Pi : public IExpression {
+public:
+	virtual void interpret(Stack<Number> &stack) {
+		Number value(boost::math::constants::pi<mpfr_float>());
+		stack.push(value);
+	};
+};
+
+class Expression_Constant_E : public IExpression {
+public:
+	virtual void interpret(Stack<Number> &stack) {
+		Number value(boost::math::constants::e<mpfr_float>());
+		stack.push(value);
+	};
 };
 
 static map<string, shared_ptr<IExpression>> s_operatorTable = {
@@ -434,8 +501,8 @@ static map<string, shared_ptr<IExpression>> s_functionTable = {
 };
 
 static map<string, shared_ptr<IExpression>> s_constantTable = {
-	{ "M_PI",		make_shared<Expression_Number>(M_PI)	},
-	{ "M_E",		make_shared<Expression_Number>(M_E)		},
+	{ "M_PI",		make_shared<Expression_Constant_Pi>()	},
+	{ "M_E",		make_shared<Expression_Constant_E>()	},
 };
 
 static map<string, shared_ptr<IExpression>> s_memoryTable = {
@@ -467,7 +534,7 @@ std::shared_ptr<IExpression> getExpression(string token)
 	}
 	else {
 		try {
-			Expression_Number expression_Number(stod(token));
+			Expression_Number expression_Number(token);
 			return make_shared<Expression_Number>(expression_Number);
 		}
 		catch (std::invalid_argument &e) {
