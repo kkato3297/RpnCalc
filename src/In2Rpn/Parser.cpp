@@ -527,6 +527,7 @@ const map<string, TOKEN_DESCRIPTOR> identifierOrder = {
 	{ "M_PI",		{ 0,  false }			},	// Pi
 	{ "M_E",		{ 0,  false }			},	// Napier's constant
 	// Memory value
+	{ "MEMORY_M",	{ 0,  false }			},
 	{ "MEMORY_X",	{ 0,  false }			},
 	{ "MEMORY_Y",	{ 0,  false }			},
 	{ "MEMORY_A",	{ 0,  false }			},

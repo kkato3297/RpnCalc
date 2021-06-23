@@ -6,8 +6,53 @@
 #include <In2Rpn/In2Rpn.h>
 #include <Rpn/Rpn.h>
 #include <Exception.h>
+#include <MemoryRepository.h>
 
 static Rpn rpn;
+
+const std::map<std::string, MemoryKey> s_keyTable = {
+	{ "MEMORY_M", MemoryKey::MEMORY_M },
+	{ "MEMORY_A", MemoryKey::MEMORY_A },
+	{ "MEMORY_B", MemoryKey::MEMORY_B },
+	{ "MEMORY_C", MemoryKey::MEMORY_C },
+	{ "MEMORY_D", MemoryKey::MEMORY_D },
+	{ "MEMORY_X", MemoryKey::MEMORY_X },
+	{ "MEMORY_Y", MemoryKey::MEMORY_Y },
+	{ "MEMORY_ANS", MemoryKey::MEMORY_ANS },
+};
+
+bool convertKey(const std::string& key, MemoryKey& result)
+{
+	const bool status = s_keyTable.find(key) != s_keyTable.end();
+
+	if (status) {
+		result = s_keyTable.at(key);
+	}
+
+	return status;
+}
+
+void setMemory(const std::map<std::string, std::string>& memory)
+{
+	MemoryRepository& memoryRepository = MemoryRepository::getInstance();
+
+	for (auto&& item : memory) {
+		MemoryKey key;
+
+		if (convertKey(item.first, key)) {
+			memoryRepository.set(key, item.second);
+		}
+	}
+}
+
+void getMemory(std::map<std::string, std::string>& memory)
+{
+	MemoryRepository& memoryRepository = MemoryRepository::getInstance();
+
+	for (auto&& item : s_keyTable) {
+		memory[item.first] = memoryRepository.get(item.second);
+	}
+}
 
 std::string convIn2Rpn(const std::string &expr)
 {
