@@ -7,6 +7,11 @@
 
 #include <string>
 #include <exception>
+#include <map>
+
+void setMemory(const std::map<std::string, std::string>& memory);
+
+void getMemory(std::map<std::string, std::string>& memory);
 
 std::string convIn2Rpn(const std::string &expr);
 

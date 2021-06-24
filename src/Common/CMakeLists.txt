@@ -7,6 +7,7 @@ cmake_minimum_required (VERSION 3.4.1)
 target_sources (RpnCalc
 	PUBLIC
 		"Common/Exception.cpp"
-		"Common/Data.cpp")
+		"Common/Data.cpp"
+		"Common/MemoryRepository.cpp")
 
 # TODO: テストを追加し、必要な場合は、ターゲットをインストールします。

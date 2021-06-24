@@ -50,7 +50,18 @@ map<string, int> functionOrder = {
 
 map<string, int> constList = {
 	{ "M_PI",		0			},
-	{ "M_E",		0			}
+	{ "M_E",		0			},
+};
+
+map<string, int> memoryList = {
+	{ "MEMORY_M",	0			},
+	{ "MEMORY_A",	0			},
+	{ "MEMORY_B",	0			},
+	{ "MEMORY_C",	0			},
+	{ "MEMORY_D",	0			},
+	{ "MEMORY_X",	0			},
+	{ "MEMORY_Y",	0			},
+	{ "MEMORY_ANS",	0			},
 };
 
 bool isNumeric(string &token)
@@ -62,7 +73,7 @@ bool isNumeric(string &token)
 		bRet = true;
 	}
 	catch (std::invalid_argument &e) {
-		bRet = constList.find(token) != constList.end();
+		bRet = constList.find(token) != constList.end() || memoryList.find(token) != memoryList.end();
 	};
 
 	if (token == ".") {
@@ -192,6 +203,9 @@ string In2Rpn::separateToken(const string &expr)
 			tokenlist.push_back(escape(key.first));
 		}
         for (auto &key : constList) {
+            tokenlist.push_back(escape(key.first));
+        }
+        for (auto &key : memoryList) {
             tokenlist.push_back(escape(key.first));
         }
 		tokenlist.push_back(escape("("));

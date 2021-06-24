@@ -1,6 +1,7 @@
 #define _USE_MATH_DEFINES
 
 #include <Rpn/Expression.h>
+#include <MemoryRepository.h>
 
 #include <cmath>
 #include <random>
@@ -459,6 +460,22 @@ public:
 	};
 };
 
+class Expression_Memory : public IExpression {
+public:
+	Expression_Memory(const MemoryKey& key) : m_key(key) {};
+
+	virtual void interpret(Stack<Number> &stack) {
+		Number value(MemoryRepository::getInstance().get(m_key));
+		stack.push(value);
+	};
+
+private:
+	Expression_Memory(void) = delete;
+	Expression_Memory(const Expression_Memory&) = delete;
+
+	MemoryKey m_key;
+};
+
 static map<string, shared_ptr<IExpression>> s_operatorTable = {
 	{ "~",			make_shared<Expression_UnaryMinus>()	},
 	{ "+",			make_shared<Expression_Plus>()			},
@@ -506,12 +523,14 @@ static map<string, shared_ptr<IExpression>> s_constantTable = {
 };
 
 static map<string, shared_ptr<IExpression>> s_memoryTable = {
-	{ "MEMORY_A",	make_shared<Expression_Number>(M_PI)	},
-	{ "MEMORY_B",	make_shared<Expression_Number>(M_E)		},
-	{ "MEMORY_C",	make_shared<Expression_Number>(M_PI)	},
-	{ "MEMORY_D",	make_shared<Expression_Number>(M_E)		},
-	{ "MEMORY_X",	make_shared<Expression_Number>(M_PI)	},
-	{ "MEMORY_Y",	make_shared<Expression_Number>(M_E)		},
+	{ "MEMORY_M",	make_shared<Expression_Memory>(MemoryKey::MEMORY_M)		},
+	{ "MEMORY_A",	make_shared<Expression_Memory>(MemoryKey::MEMORY_A)		},
+	{ "MEMORY_B",	make_shared<Expression_Memory>(MemoryKey::MEMORY_B)		},
+	{ "MEMORY_C",	make_shared<Expression_Memory>(MemoryKey::MEMORY_C)		},
+	{ "MEMORY_D",	make_shared<Expression_Memory>(MemoryKey::MEMORY_D)		},
+	{ "MEMORY_X",	make_shared<Expression_Memory>(MemoryKey::MEMORY_X)		},
+	{ "MEMORY_Y",	make_shared<Expression_Memory>(MemoryKey::MEMORY_Y)		},
+	{ "MEMORY_ANS",	make_shared<Expression_Memory>(MemoryKey::MEMORY_ANS)	},
 };
 
 std::shared_ptr<IExpression> getExpression(string token)
