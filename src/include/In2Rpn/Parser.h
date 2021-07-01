@@ -17,6 +17,7 @@ public:
 	virtual ~IExpressionNode(void);
 
 	virtual string toString(void) = 0;
+	virtual string toSolutionString(void) = 0;
 };
 
 class Tree
@@ -34,12 +35,13 @@ private:
 
 enum TokenType
 {
-	Number,
-	Operator,
-	Function,
-	Identifier,
-	End,
-	Error,
+	NumberToken,
+	OperatorToken,
+	FunctionToken,
+	ConstantToken,
+	MemoryToken,
+	EndToken,
+	ErrorToken,
 };
 
 class Token
@@ -110,14 +112,15 @@ public:
 
 private:
 	shared_ptr<IExpressionNode> parseExpression(void);
-	shared_ptr<IExpressionNode> parseUnaryExpression(void);
-	shared_ptr<IExpressionNode> parseTermExpression(void);
-	shared_ptr<IExpressionNode> parseFunctionExpression(void);
-	shared_ptr<IExpressionNode> parseIdentifierExpression(void);
-	shared_ptr<IExpressionNode> parseNumberExpression(void);
-	shared_ptr<IExpressionNode> parseParenExpression(void);
-
 	shared_ptr<IExpressionNode> parseBinaryExpression(shared_ptr<IExpressionNode> lhs, int minPrec);
+	shared_ptr<IExpressionNode> parseTermExpression(void);
+	shared_ptr<IExpressionNode> parseUnaryExpression(void);
+	shared_ptr<IExpressionNode> parseFunctionExpression(void);
+	shared_ptr<IExpressionNode> parseParenExpression(void);
+	shared_ptr<IExpressionNode> parseIdentifierExpression(void);
+	shared_ptr<IExpressionNode> parseConstantExpression(void);
+	shared_ptr<IExpressionNode> parseMemoryExpression(void);
+	shared_ptr<IExpressionNode> parseNumberExpression(void);
 
 	int getPrec(string& ope);
 	int getPrec(string&& ope);

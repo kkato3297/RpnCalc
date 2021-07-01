@@ -1,14 +1,10 @@
 #include <In2Rpn/In2Rpn.h>
-#include <Stack.h>
+#include <vector>
 #include <map>
 #include <regex>
 #include <algorithm>
 
 #include <iostream>
-
-#if 1
-#include "Parser.h"
-#endif
 
 const map<string, int> operatorOrder = {
 	{ "+",			0			},
@@ -119,6 +115,7 @@ string escape(const string &str)
 In2Rpn::In2Rpn(const string &expr)
 {
 	string work;
+	vector<string> tokenList = {};
 
 #if 1
 	work = separateToken(expr);
@@ -133,8 +130,11 @@ In2Rpn::In2Rpn(const string &expr)
 	sregex_iterator end;
 
 	for (; iter != end; iter++) {
-		m_tokenList.push_back(iter->str());
+		tokenList.push_back(iter->str());
 	}
+
+	Parser parser;
+	m_tokenTree = parser.parse(tokenList);
 }
 
 In2Rpn::~In2Rpn(void)
@@ -142,54 +142,12 @@ In2Rpn::~In2Rpn(void)
 
 string In2Rpn::toRpn(void)
 {
-	Stack<string> stack;
-	vector<string> buffer;
+	return m_tokenTree.getRootNode()->toString();
+}
 
-#if 0
-	for (auto &token : m_tokenList) {
-		if (isNumeric(token)) {
-			// それは数字か
-			buffer.push_back(token);
-		} else if (token == ")") {
-			// 右かっこか
-			string temp = stack.pop();
-			while (temp != "(") {
-				buffer.push_back(temp);
-
-				temp = stack.pop();
-			}
-		} else if (token == "(") {
-			// 左かっこか
-			stack.push(token);
-		} else {
-			// スタックは空か
-			while (stack.length()) {
-				string temp = stack.back();
-				// スタックの最上位演算子よりトークン演算子の優先順序が低い
-				if (operatorOrder.find(temp) != operatorOrder.end() &&
-					operatorOrder.at(temp) >= operatorOrder.at(token)) {
-					// スタックからポップし、それをバッファへ
-					buffer.push_back(stack.pop());
-				} else {
-					break;
-				}
-			}
-
-			stack.push(token);
-		}
-	}
-#else
-	Parser parser;
-	Tree& tree = parser.parse(m_tokenList);
-	string expr = tree.getRootNode()->toString();
-	return expr;
-#endif
-
-	while (stack.length()) {
-		buffer.push_back(stack.pop());
-	}
-
-	return join(buffer, " ");
+string In2Rpn::toSolutionExpression(void)
+{
+	return m_tokenTree.getRootNode()->toSolutionString();
 }
 
 string In2Rpn::separateToken(const string &expr)

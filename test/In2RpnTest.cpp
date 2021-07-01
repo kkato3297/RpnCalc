@@ -53,3 +53,18 @@ void In2RpnTest::testcase0009(void) {
 	In2Rpn in2rpn(string(".5"));
 	CPPUNIT_ASSERT(in2rpn.toRpn() == ".5");
 }
+
+void In2RpnTest::testcase0010(void) {
+	In2Rpn in2rpn(string("2 ( 3 + 4 ( 5 + 6 ( 7 + 8 ) ) )"));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == "2 3 4 5 6 7 8 + * + * + *");
+}
+
+void In2RpnTest::testcase0011(void) {
+	In2Rpn in2rpn(string("6 / 2 (1 + 2)"));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == "6 2 1 2 + * /");
+}
+
+void In2RpnTest::testcase0012(void) {
+	In2Rpn in2rpn(string("sin 2 M_PI"));
+	CPPUNIT_ASSERT(in2rpn.toRpn() == "2 M_PI * sin@1");
+}

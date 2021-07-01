@@ -2,9 +2,23 @@
 // Created by KK Systems on 2020-01-27.
 //
 
-#include "Parser.h"
+#include <In2Rpn/Parser.h>
 #include <Exception.h>
 #include <map>
+
+std::string join(const std::vector<std::string>& v, const char* delim = 0)
+{
+	std::string s;
+
+	if (!v.empty()) {
+		s += v[0];
+		for (decltype(v.size()) i = 1, c = v.size(); i < c; ++i) {
+			if (delim) s += delim;
+			s += v[i];
+		}
+	}
+	return s;
+}
 
 IExpressionNode::IExpressionNode(void)
 {
@@ -29,6 +43,7 @@ public:
 	string& getOperator(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 private:
 	shared_ptr<IExpressionNode> m_rhs;
@@ -77,7 +92,34 @@ string& UnaryExpressionNode::getOperator(void)
 
 string UnaryExpressionNode::toString()
 {
-	return m_rhs->toString() + " " + m_operator;
+	string result = m_rhs->toString();
+
+	if (m_operator != "") {
+		result += " " + m_operator;
+	}
+
+	return result;
+}
+
+string UnaryExpressionNode::toSolutionString()
+{
+	string result = "( ";
+
+	if (m_operator == "+" || m_operator == "-" || m_operator == "~") {
+		result += m_operator + " ";
+	}
+
+	result += m_rhs->toSolutionString();
+
+	if (m_operator == "!" || m_operator == "square" ||
+		m_operator == "cube" || m_operator == "inverse" ||
+		m_operator == "%") {
+		result += " " + m_operator;
+	}
+
+	result += " )";
+
+	return result;
 }
 
 class NumberExpressionNode: public IExpressionNode
@@ -91,6 +133,7 @@ public:
 	string& getNumber(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 private:
 	string m_value;
@@ -125,6 +168,11 @@ string NumberExpressionNode::toString()
 	return m_value;
 }
 
+string NumberExpressionNode::toSolutionString()
+{
+	return m_value;
+}
+
 class FunctionExpressionNode: public IExpressionNode
 {
 public:
@@ -139,6 +187,7 @@ public:
 	vector<shared_ptr<IExpressionNode>>& getArgument(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 private:
 	string								m_function;
@@ -196,6 +245,21 @@ string FunctionExpressionNode::toString()
 	return result;
 }
 
+string FunctionExpressionNode::toSolutionString()
+{
+	string result = "( " + m_function + "( ";
+	vector<string> argumentList = {};
+
+	std::transform(m_argument.begin(), m_argument.end(), std::inserter(argumentList, argumentList.end()), [](const auto& argument) {
+		return argument->toSolutionString();
+	});
+	result += join(argumentList, ", ");
+
+	result += " ) )";
+
+	return result;
+}
+
 class IdentiferExpressionNode: public IExpressionNode
 {
 public:
@@ -207,6 +271,7 @@ public:
 	string& getIdentifer(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 private:
 	string m_ident;
@@ -241,6 +306,11 @@ string IdentiferExpressionNode::toString()
 	return m_ident;
 }
 
+string IdentiferExpressionNode::toSolutionString()
+{
+	return m_ident;
+}
+
 class TermExpressionNode: public IExpressionNode
 {
 public:
@@ -259,6 +329,7 @@ public:
 	string& getOperator(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 protected:
 	shared_ptr<IExpressionNode> m_lhs;
@@ -327,6 +398,11 @@ string TermExpressionNode::toString()
 	return m_lhs->toString() + " " + m_rhs->toString() + " " + m_operator;
 }
 
+string TermExpressionNode::toSolutionString()
+{
+	return "( " + m_lhs->toSolutionString() + " " + m_operator + " " + m_rhs->toSolutionString() + " )";
+}
+
 class BinaryExpressionNode: public IExpressionNode
 {
 public:
@@ -345,6 +421,7 @@ public:
 	string& getOperator(void);
 
 	string toString(void);
+	string toSolutionString(void);
 
 protected:
 	shared_ptr<IExpressionNode> m_lhs;
@@ -411,6 +488,11 @@ string& BinaryExpressionNode::getOperator(void)
 string BinaryExpressionNode::toString()
 {
 	return m_lhs->toString() + " " + m_rhs->toString() + " " + m_operator;
+}
+
+string BinaryExpressionNode::toSolutionString()
+{
+	return "( " + m_lhs->toSolutionString() + " " + m_operator + " " + m_rhs->toSolutionString() + " )";
 }
 
 
@@ -489,7 +571,7 @@ shared_ptr<Token>& Tokenizer::tokenize(const vector<string>& source)
 		readToken();
 	}
 
-	appendToken(make_shared<Token>(End, "End"));
+	appendToken(make_shared<Token>(EndToken, "End"));
 
 	return m_token;
 }
@@ -522,10 +604,12 @@ const map<string, TOKEN_DESCRIPTOR> operatorOrder = {
 	// Special token
 	{ ",",			{ 0,  false }			},	// Separate Operator
 };
-const map<string, TOKEN_DESCRIPTOR> identifierOrder = {
+const map<string, TOKEN_DESCRIPTOR> constantOrder = {
 	// const value
 	{ "M_PI",		{ 0,  false }			},	// Pi
 	{ "M_E",		{ 0,  false }			},	// Napier's constant
+};
+const map<string, TOKEN_DESCRIPTOR> memoryOrder = {
 	// Memory value
 	{ "MEMORY_M",	{ 0,  false }			},
 	{ "MEMORY_X",	{ 0,  false }			},
@@ -567,9 +651,14 @@ bool isOperator(string &token)
 	return operatorOrder.find(token) != operatorOrder.end();
 }
 
-bool isIdentifier(string &token)
+bool isConstant(string &token)
 {
-	return identifierOrder.find(token) != identifierOrder.end();
+	return constantOrder.find(token) != constantOrder.end();
+}
+
+bool isMemory(string &token)
+{
+	return memoryOrder.find(token) != memoryOrder.end();
 }
 
 bool isFunction(string &token)
@@ -580,15 +669,17 @@ bool isFunction(string &token)
 void Tokenizer::readToken(void)
 {
 	if (isNumeric(*m_iter)) {
-		appendToken(make_shared<Token>(Number, *m_iter++));
+		appendToken(make_shared<Token>(NumberToken, *m_iter++));
 	} else if (isOperator(*m_iter)) {
-		appendToken(make_shared<Token>(Operator, *m_iter++));
-	} else if (isIdentifier(*m_iter)) {
-		appendToken(make_shared<Token>(Identifier, *m_iter++));
+		appendToken(make_shared<Token>(OperatorToken, *m_iter++));
+	} else if (isConstant(*m_iter)) {
+		appendToken(make_shared<Token>(ConstantToken, *m_iter++));
+	} else if (isMemory(*m_iter)) {
+		appendToken(make_shared<Token>(MemoryToken, *m_iter++));
 	} else if (isFunction(*m_iter)) {
-		appendToken(make_shared<Token>(Function, *m_iter++));
+		appendToken(make_shared<Token>(FunctionToken, *m_iter++));
 	} else {
-		appendToken(make_shared<Token>(Error, *m_iter++));
+		appendToken(make_shared<Token>(ErrorToken, *m_iter++));
 	}
 }
 
@@ -616,7 +707,7 @@ TokenReader::~TokenReader()
 
 bool TokenReader::hasNext(void)
 {
-	return m_token->getType() != End;
+	return m_token->getType() != EndToken;
 }
 
 string TokenReader::peek(void)
@@ -627,7 +718,7 @@ string TokenReader::peek(void)
 string TokenReader::next(void)
 {
 	string data = m_token->getToken();
-	if (m_token->getType() == Error) {
+	if (m_token->getType() == ErrorToken) {
 		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
@@ -637,7 +728,7 @@ string TokenReader::next(void)
 string TokenReader::next(const string &&token)
 {
 	string data = m_token->getToken();
-	if (data != token || m_token->getType() == Error) {
+	if (data != token || m_token->getType() == ErrorToken) {
 		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
@@ -647,7 +738,7 @@ string TokenReader::next(const string &&token)
 string TokenReader::next(const TokenType type)
 {
 	string data = m_token->getToken();
-	if (m_token->getType() != type || m_token->getType() == Error) {
+	if (m_token->getType() != type || m_token->getType() == ErrorToken) {
 		throw SyntaxErrorException("unexpected token : " + data);
 	}
 	m_token = m_token->getNext();
@@ -682,7 +773,7 @@ Tree& Parser::parse(vector<string>& expression)
 	shared_ptr<IExpressionNode> node = parseExpression();
 	m_tree.addExpression(node);
 
-	m_tr->next(End);
+	m_tr->next(EndToken);
 
 	return m_tree;
 }
@@ -690,52 +781,109 @@ Tree& Parser::parse(vector<string>& expression)
 shared_ptr<IExpressionNode> Parser::parseExpression(void)
 {
 	/*
-	 * <expression> := <unary> { [ ( `+` | `-` | `*` | `/` ) ] <term> };
+	 * <expression> := <term> { <binary> }*;
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
-	auto node = parseUnaryExpression();
+	auto node = parseTermExpression();
 	return parseBinaryExpression(node, 0);
 }
 
-shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
+shared_ptr<IExpressionNode> Parser::parseBinaryExpression(shared_ptr<IExpressionNode> lhs, int minPrec)
 {
 	/*
-	 * <unary> := [ ( `+` | `-` ) ] <term>;
+	 * <binary> := ... { [ ( `+` | `-` | `*` | `/` | `^` ) ] <term> };
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
-	shared_ptr<IExpressionNode> en = nullptr;
-	if (m_tr->is("+")) {
-		m_tr->next("+");
-	} else if (m_tr->is("-")) {
-		auto node = make_shared<UnaryExpressionNode>();
-		m_tr->next("-");
-		node->setOperator("~");
-		node->setRhs(parseTermExpression());
-		en = static_pointer_cast<IExpressionNode>(node);
+	int prec = -1;
+
+	while (true) {
+		string op = "*", nextOp = "";
+
+		if (m_tr->is(OperatorToken) && getPrec(m_tr->peek()) >= 0) {
+			// Load current token
+			op = m_tr->peek();
+		}
+
+		if (m_tr->is(EndToken) || m_tr->is(",") || m_tr->is(")") || (prec = getPrec(op)) < minPrec) {
+			// Ended term on this phase
+			break;
+		}
+
+		if (m_tr->is(OperatorToken) && getPrec(m_tr->peek()) >= 0) {
+			// Load next token
+			op = m_tr->next(OperatorToken);
+		}
+
+		auto rhs = parseTermExpression();
+
+		if (!m_tr->is(EndToken)) {
+			if (!m_tr->is(OperatorToken) || getPrec(m_tr->peek()) == -1) {
+				nextOp = "*";
+			} else {
+				nextOp = m_tr->peek();
+			}
+
+			if (getPrec(nextOp) > prec) {
+				rhs = parseBinaryExpression(rhs, prec + 1);
+			}
+		}
+
+		auto ben = make_shared<BinaryExpressionNode>();
+		ben->setLhs(lhs);
+		ben->setOperator(op);
+		ben->setRhs(rhs);
+		lhs = static_pointer_cast<IExpressionNode>(ben);
 	}
 
-	if (!en) {
-		en = parseTermExpression();
-	}
-
-	return en;
+	return lhs;
 }
 
 shared_ptr<IExpressionNode> Parser::parseTermExpression(void)
 {
 	/*
-	 * <term> := ( <function> | <identifier> | <number> | `(` <expression> `)` ) [ `!` | `square` | `cube` | `inverse` ];
+	 * <term> := { <unary> }*;
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
 	shared_ptr<IExpressionNode> en = nullptr;
-	if (m_tr->is(Function)) {
+	en = parseUnaryExpression();
+	while (!(m_tr->is("+") || m_tr->is("-") || m_tr->is("*") || m_tr->is("/") || m_tr->is("^") || m_tr->is(")") || m_tr->is(",")) && !m_tr->is(EndToken)) {
+		auto ben = make_shared<BinaryExpressionNode>();
+		ben->setLhs(en);
+		ben->setOperator("*");
+		ben->setRhs(parseUnaryExpression());
+		en = static_pointer_cast<IExpressionNode>(ben);
+	}
+
+	return en;
+}
+
+shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
+{
+	/*
+	 * <unary> := [ ( `+` | `~` | `-` ) ] ( <function> | <identifier> | <paren> ) [ `!` | `square` | `cube` | `inverse` | `%` ];
+	 */
+	printf("%s\r\n", __FUNCTION__);
+
+	shared_ptr<UnaryExpressionNode> unaryNode = make_shared<UnaryExpressionNode>();
+
+	unaryNode->setOperator("");
+	if (m_tr->is("+")) {
+		m_tr->next("+");
+	} else if (m_tr->is("-")) {
+		m_tr->next("-");
+		unaryNode->setOperator("~");
+	}
+
+	shared_ptr<IExpressionNode> en = nullptr;
+
+	if (m_tr->is(FunctionToken)) {
 		en = parseFunctionExpression();
-	} else if (m_tr->is(Identifier)) {
+	} else if (m_tr->is(ConstantToken) || m_tr->is(MemoryToken)) {
 		en = parseIdentifierExpression();
-	} else if (m_tr->is(Number)) {
+	} else if (m_tr->is(NumberToken)) {
 		en = parseNumberExpression();
 	} else if (m_tr->is("(")) {
 		en = parseParenExpression();
@@ -746,23 +894,25 @@ shared_ptr<IExpressionNode> Parser::parseTermExpression(void)
 	// 右辺修飾演算子
 	if (m_tr->is("!") || m_tr->is("square") || m_tr->is("cube") || m_tr->is("inverse") || m_tr->is("%")) {
 		auto node = make_shared<UnaryExpressionNode>();
-		auto op = m_tr->next(Operator);
+		auto op = m_tr->next(OperatorToken);
 		node->setOperator(op);
 		node->setRhs(en);
 		en = static_pointer_cast<IExpressionNode>(node);
 	}
 
-	return en;
+	unaryNode->setRhs(en);
+
+	return unaryNode;
 }
 
 shared_ptr<IExpressionNode> Parser::parseFunctionExpression(void)
 {
 	/*
-	 * <function> := <function_name> [ ( `(` <expr> [ { `,` <expr> } ] `)` ] | <unary> )
+	 * <function> := <function_name> [ ( `(` <expression> [ { `,` <expression> } ] `)` ] | <term> );
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
-	const string& token = m_tr->next(Function);
+	const string& token = m_tr->next(FunctionToken);
 	vector<shared_ptr<IExpressionNode>> argument;
 	if (functionOrder.at(token).hasParameter) {
 		if (m_tr->is("(")) {
@@ -774,7 +924,7 @@ shared_ptr<IExpressionNode> Parser::parseFunctionExpression(void)
 			}
 			m_tr->next(")");
 		} else {
-			argument.push_back(parseUnaryExpression());
+			argument.push_back(parseTermExpression());
 		}
 	}
 	auto node = make_shared<FunctionExpressionNode>();
@@ -783,36 +933,10 @@ shared_ptr<IExpressionNode> Parser::parseFunctionExpression(void)
 	return static_pointer_cast<IExpressionNode>(node);
 }
 
-shared_ptr<IExpressionNode> Parser::parseIdentifierExpression(void)
-{
-	/*
-	 * <identifier>;
-	 */
-	printf("%s\r\n", __FUNCTION__);
-
-	const string& token = m_tr->next(Function);
-	auto node = make_shared<IdentiferExpressionNode>();
-	node->setIdentifer(token);
-	return static_pointer_cast<IExpressionNode>(node);
-}
-
-shared_ptr<IExpressionNode> Parser::parseNumberExpression(void)
-{
-	/*
-	 * <number>;
-	 */
-	printf("%s\r\n", __FUNCTION__);
-
-	const string& token = m_tr->next(Number);
-	auto node = make_shared<NumberExpressionNode>();
-	node->setNumber(token);
-	return static_pointer_cast<IExpressionNode>(node);
-}
-
 shared_ptr<IExpressionNode> Parser::parseParenExpression(void)
 {
 	/*
-	 * `(` <expr> `)`;
+	 * <paren> := `(` <expression> `)`;
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
@@ -822,53 +946,65 @@ shared_ptr<IExpressionNode> Parser::parseParenExpression(void)
 	return node;
 }
 
-shared_ptr<IExpressionNode> Parser::parseBinaryExpression(shared_ptr<IExpressionNode> lhs, int minPrec)
+shared_ptr<IExpressionNode> Parser::parseIdentifierExpression(void)
 {
 	/*
-	 * ... { [ ( `+` | `-` | `*` | `/` ) ] <term> };
+	 * <identifier> := ( <constant> | <memory> | <number> );
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
-	int prec = -1;
+	shared_ptr<IExpressionNode> node = nullptr;
 
-	while (true) {
-		string op = "*", nextOp = "";
-
-		if (m_tr->is(Operator) && getPrec(m_tr->peek()) >= 0) {
-			// Load current token
-			op = m_tr->peek();
-		}
-
-		if (m_tr->is(End) || m_tr->is(",") || m_tr->is(")") || (prec = getPrec(op)) < minPrec) {
-			// Ended term on this phase
-			break;
-		}
-
-		if (m_tr->is(Operator) && getPrec(m_tr->peek()) >= 0) {
-			// Load next token
-			op = m_tr->next(Operator);
-		}
-
-		auto rhs = parseTermExpression();
-
-		if (!m_tr->is(Operator) || getPrec(m_tr->peek()) == -1) {
-			nextOp = "*";
-		} else {
-			nextOp = m_tr->peek();
-		}
-
-		if (getPrec(nextOp) > prec) {
-			rhs = parseBinaryExpression(rhs, prec + 1);
-		}
-
-		auto ben = make_shared<BinaryExpressionNode>();
-		ben->setLhs(lhs);
-		ben->setOperator(op);
-		ben->setRhs(rhs);
-		lhs = static_pointer_cast<IExpressionNode>(ben);
+	if (m_tr->is(ConstantToken)) {
+		node = parseConstantExpression();
+	} else if (m_tr->is(MemoryToken)) {
+		node = parseMemoryExpression();
+	} else if (m_tr->is(NumberToken)) {
+		node = parseNumberExpression();
+	} else {
+		throw SyntaxErrorException("unexpected token : " + m_tr->peek());
 	}
 
-	return lhs;
+	return node;
+}
+
+shared_ptr<IExpressionNode> Parser::parseConstantExpression(void)
+{
+	/*
+	 * <constant> := ( `M_PI` | `M_E` );
+	 */
+	printf("%s\r\n", __FUNCTION__);
+
+	const string& token = m_tr->next(ConstantToken);
+	auto node = make_shared<IdentiferExpressionNode>();
+	node->setIdentifer(token);
+	return static_pointer_cast<IExpressionNode>(node);
+}
+
+shared_ptr<IExpressionNode> Parser::parseMemoryExpression(void)
+{
+	/*
+	 * <memory> := ( `MEMORY_ANS` | `MEMORY_A` | `MEMORY_B` | `MEMORY_C` | `MEMORY_D` | `MEMORY_M` | `MEMORY_X` | `MEMORY_Y` );
+	 */
+	printf("%s\r\n", __FUNCTION__);
+
+	const string& token = m_tr->next(MemoryToken);
+	auto node = make_shared<IdentiferExpressionNode>();
+	node->setIdentifer(token);
+	return static_pointer_cast<IExpressionNode>(node);
+}
+
+shared_ptr<IExpressionNode> Parser::parseNumberExpression(void)
+{
+	/*
+	 * <number> := ( [0-9]+ | [0-9]*\.[0-9]+ | [0-9]*\.[0-9]+e\+[0-9]+ );
+	 */
+	printf("%s\r\n", __FUNCTION__);
+
+	const string& token = m_tr->next(NumberToken);
+	auto node = make_shared<NumberExpressionNode>();
+	node->setNumber(token);
+	return static_pointer_cast<IExpressionNode>(node);
 }
 
 int Parser::getPrec(string& ope)

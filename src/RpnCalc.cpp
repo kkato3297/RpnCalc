@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 	Rpn rpn;
 	string expr, command("y");
 
+	mpfr_float::default_precision(100);
+
 	do {
 		cout << "expression: ";
 		getline(cin, expr);
@@ -25,9 +27,10 @@ int main(int argc, char *argv[])
 			expr = in2rpn.toRpn();
 
 			cout << "rpn expr: \"" << expr << "\"" << endl;
+			cout << "solution expr: \"" << in2rpn.toSolutionExpression() << "\"" << endl;
 
 			// 実行
-			cout << "result: " << rpn.exec(expr) << endl;
+			cout << "result: " << std::setprecision(mpfr_float::default_precision()) << rpn.exec(expr) << endl;
 		}
 		catch (StackOverflowException &e) {
 			cout << "Stack OverFlow: " << e.what() << endl;
