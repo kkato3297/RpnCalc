@@ -8,6 +8,7 @@ target_sources (RpnCalc
 	PUBLIC
 		"Common/Exception.cpp"
 		"Common/Data.cpp"
-		"Common/MemoryRepository.cpp")
+		"Common/MemoryRepository.cpp"
+		"Common/Utility.cpp")
 
 # TODO: テストを追加し、必要な場合は、ターゲットをインストールします。

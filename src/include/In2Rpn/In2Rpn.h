@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <In2Rpn/Parser.h>
 
 using namespace std;
 
@@ -12,10 +12,11 @@ public:
 	virtual ~In2Rpn(void);
 
 	string toRpn(void);
+	string toSolutionExpression(void);
 
 private:
 	string separateToken(const string &expr);
 
 private:
-	vector<string> m_tokenList;
+	Tree m_tokenTree;
 };

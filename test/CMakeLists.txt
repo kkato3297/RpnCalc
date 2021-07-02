@@ -30,6 +30,18 @@ if(${TARGET_PLATFORM} STREQUAL "PLATFORM_WINDOWS")
 elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_LINUX")
 	target_link_libraries(RpnCalcTest cppunit)
 elseif(${TARGET_PLATFORM} STREQUAL "PLATFORM_MACOS")
+	list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/src/.cmake)
+	set(Boost_DIR "$ENV{HOME}/.local/boost/boost_1_76_0/lib/cmake/Boost-1.76.0")
+
+	find_package(Boost REQUIRED)
+	find_package(GMP REQUIRED)
+	find_package(MPFR REQUIRED)
+
+	target_include_directories(RpnCalcTest
+		PRIVATE ${Boost_INCLUDE_DIRS}
+		PRIVATE ${GMP_INCLUDE_DIR}
+	)
+	target_link_libraries(RpnCalcTest GMP::GMP MPFR::MPFR)
 	target_link_libraries(RpnCalcTest cppunit)
 endif()
 target_compile_definitions(RpnCalcTest PUBLIC _UNICODE UNICODE)
