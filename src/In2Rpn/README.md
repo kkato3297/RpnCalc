@@ -8,7 +8,7 @@
 <term> := { <unary> }*;
 <unary> := [ ( `+` | `~` | `-` ) ] ( <function> | <identifier> | <paren> ) [ `!` | `square` | `cube` | `inverse` | `%` ];
 
-<function> := <function_name> [ ( `(` <expression> [ { `,` <expression> } ] `)` ] | <term> );
+<function> := <function_name> [ ( `(` <expression> [ { `,` <expression> }+ ] `)` ] | <term> );
 
 <paren> := `(` <expression> `)`;
 

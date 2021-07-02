@@ -1,4 +1,5 @@
 #include <In2Rpn/In2Rpn.h>
+#include <Utility.h>
 #include <vector>
 #include <map>
 #include <regex>
@@ -77,21 +78,6 @@ bool isNumeric(string &token)
 	}
 
 	return bRet;
-}
-
-string join(vector<string> &list, const string &spliter)
-{
-	string buffer = "";
-
-	for (auto iter = list.begin(); iter < list.end(); iter++) {
-		buffer += (*iter);
-
-		if (iter < list.end() - 1) {
-			buffer += spliter;
-		}
-	}
-
-	return buffer;
 }
 
 double strtod(const string::iterator begin, string::iterator &end)

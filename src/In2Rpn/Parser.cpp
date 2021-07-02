@@ -3,22 +3,9 @@
 //
 
 #include <In2Rpn/Parser.h>
+#include <Utility.h>
 #include <Exception.h>
 #include <map>
-
-std::string join(const std::vector<std::string>& v, const char* delim = 0)
-{
-	std::string s;
-
-	if (!v.empty()) {
-		s += v[0];
-		for (decltype(v.size()) i = 1, c = v.size(); i < c; ++i) {
-			if (delim) s += delim;
-			s += v[i];
-		}
-	}
-	return s;
-}
 
 IExpressionNode::IExpressionNode(void)
 {
@@ -103,21 +90,31 @@ string UnaryExpressionNode::toString()
 
 string UnaryExpressionNode::toSolutionString()
 {
-	string result = "( ";
+	bool isLeftOperator = m_operator == "+" || m_operator == "-" || m_operator == "~";
+	bool isRightOperator = (
+		m_operator == "!" || m_operator == "square" ||
+		m_operator == "cube" || m_operator == "inverse" || m_operator == "%"
+	);
 
-	if (m_operator == "+" || m_operator == "-" || m_operator == "~") {
+	string result = "";
+
+	if (isLeftOperator) {
+		result += "( ";
+	}
+
+	if (isLeftOperator) {
 		result += m_operator + " ";
 	}
 
 	result += m_rhs->toSolutionString();
 
-	if (m_operator == "!" || m_operator == "square" ||
-		m_operator == "cube" || m_operator == "inverse" ||
-		m_operator == "%") {
+	if (isRightOperator) {
 		result += " " + m_operator;
 	}
 
-	result += " )";
+	if (isLeftOperator) {
+		result += " )";
+	}
 
 	return result;
 }
@@ -583,65 +580,65 @@ shared_ptr<Token>& Tokenizer::tokenize(const vector<string>&& source)
 }
 
 typedef struct {
-	int 	order;
-	bool	hasParameter;
+	int 		order;
+	vector<int>	validArgumentCount;
 } TOKEN_DESCRIPTOR;
 
 const map<string, TOKEN_DESCRIPTOR> operatorOrder = {
-	{ "+",			{ 0,  false }			},
-	{ "-",			{ 0,  false }			},
-	{ "*",			{ 1,  false }			},
-	{ "/",			{ 1,  false }			},
-	{ "^",			{ 2,  false }			},
-	{ "square",		{ 2,  false }			},
-	{ "cube",		{ 2,  false }			},
-	{ "inverse",	{ 2,  false }			},
-	{ "%",			{ 2,  false }			},
-	{ "!",			{ 1,  false }			},
+	{ "+",			{ 0,  {} }			},
+	{ "-",			{ 0,  {} }			},
+	{ "*",			{ 1,  {} }			},
+	{ "/",			{ 1,  {} }			},
+	{ "^",			{ 2,  {} }			},
+	{ "square",		{ 2,  {} }			},
+	{ "cube",		{ 2,  {} }			},
+	{ "inverse",	{ 2,  {} }			},
+	{ "%",			{ 2,  {} }			},
+	{ "!",			{ 1,  {} }			},
 	// paren
-	{ "(",			{ -1, false }			},
-	{ ")",			{ -1, false }			},
+	{ "(",			{ -1, {} }			},
+	{ ")",			{ -1, {} }			},
 	// Special token
-	{ ",",			{ 0,  false }			},	// Separate Operator
+	{ ",",			{ 0,  {} }			},	// Separate Operator
 };
 const map<string, TOKEN_DESCRIPTOR> constantOrder = {
 	// const value
-	{ "M_PI",		{ 0,  false }			},	// Pi
-	{ "M_E",		{ 0,  false }			},	// Napier's constant
+	{ "M_PI",		{ 0,  {} }			},	// Pi
+	{ "M_E",		{ 0,  {} }			},	// Napier's constant
 };
 const map<string, TOKEN_DESCRIPTOR> memoryOrder = {
 	// Memory value
-	{ "MEMORY_M",	{ 0,  false }			},
-	{ "MEMORY_X",	{ 0,  false }			},
-	{ "MEMORY_Y",	{ 0,  false }			},
-	{ "MEMORY_A",	{ 0,  false }			},
-	{ "MEMORY_B",	{ 0,  false }			},
-	{ "MEMORY_C",	{ 0,  false }			},
-	{ "MEMORY_D",	{ 0,  false }			},
-	{ "MEMORY_ANS",	{ 0,  false }			},
+	{ "MEMORY_M",	{ 0,  {} }			},
+	{ "MEMORY_X",	{ 0,  {} }			},
+	{ "MEMORY_Y",	{ 0,  {} }			},
+	{ "MEMORY_A",	{ 0,  {} }			},
+	{ "MEMORY_B",	{ 0,  {} }			},
+	{ "MEMORY_C",	{ 0,  {} }			},
+	{ "MEMORY_D",	{ 0,  {} }			},
+	{ "MEMORY_ANS",	{ 0,  {} }			},
 };
 const map<string, TOKEN_DESCRIPTOR> functionOrder = {
-	{ "abs",		{ 0x7fffffff, true }	},
-	{ "sin",		{ 0x7fffffff, true }	},
-	{ "cos",		{ 0x7fffffff, true }	},
-	{ "tan",		{ 0x7fffffff, true }	},
-	{ "sinh",		{ 0x7fffffff, true }	},
-	{ "cosh",		{ 0x7fffffff, true }	},
-	{ "tanh",		{ 0x7fffffff, true }	},
-	{ "asin",		{ 0x7fffffff, true }	},
-	{ "acos",		{ 0x7fffffff, true }	},
-	{ "atan",		{ 0x7fffffff, true }	},
-	{ "asinh",		{ 0x7fffffff, true }	},
-	{ "acosh",		{ 0x7fffffff, true }	},
-	{ "atanh",		{ 0x7fffffff, true }	},
-	{ "log",		{ 0x7fffffff, true }	},
-	{ "ln",			{ 0x7fffffff, true }	},
-	{ "LCM",		{ 0x7fffffff, true }	},
-	{ "GCD",		{ 0x7fffffff, true }	},
-	{ "sqrt",		{ 0x7fffffff, true }	},
-	{ "cbrt",		{ 0x7fffffff, true }	},
-	{ "Rand",		{ 0x7fffffff, false }	},
-	{ "iRand",		{ 0x7fffffff, true }	},
+	{ "abs",		{ 0x7fffffff, {1} }	},
+	{ "sin",		{ 0x7fffffff, {1} }	},
+	{ "cos",		{ 0x7fffffff, {1} }	},
+	{ "tan",		{ 0x7fffffff, {1} }	},
+	{ "sinh",		{ 0x7fffffff, {1} }	},
+	{ "cosh",		{ 0x7fffffff, {1} }	},
+	{ "tanh",		{ 0x7fffffff, {1} }	},
+	{ "asin",		{ 0x7fffffff, {1} }	},
+	{ "acos",		{ 0x7fffffff, {1} }	},
+	{ "atan",		{ 0x7fffffff, {1} }	},
+	{ "asinh",		{ 0x7fffffff, {1} }	},
+	{ "acosh",		{ 0x7fffffff, {1} }	},
+	{ "atanh",		{ 0x7fffffff, {1} }	},
+	{ "log",		{ 0x7fffffff, {1} }	},
+	{ "ln",			{ 0x7fffffff, {1} }	},
+	{ "LCM",		{ 0x7fffffff, {2, 3} }	},
+	{ "GCD",		{ 0x7fffffff, {2, 3} }	},
+	{ "sqrt",		{ 0x7fffffff, {1} }	},
+	{ "cbrt",		{ 0x7fffffff, {1} }	},
+	{ "Rand",		{ 0x7fffffff, {} }	},
+	{ "iRand",		{ 0x7fffffff, {2} }	},
 };
 
 extern bool isNumeric(string &token);
@@ -908,13 +905,19 @@ shared_ptr<IExpressionNode> Parser::parseUnaryExpression(void)
 shared_ptr<IExpressionNode> Parser::parseFunctionExpression(void)
 {
 	/*
-	 * <function> := <function_name> [ ( `(` <expression> [ { `,` <expression> } ] `)` ] | <term> );
+	 * <function> := <function_name> [ ( `(` <expression> [ { `,` <expression> }+ ] `)` ] | <term> );
 	 */
 	printf("%s\r\n", __FUNCTION__);
 
 	const string& token = m_tr->next(FunctionToken);
-	vector<shared_ptr<IExpressionNode>> argument;
-	if (functionOrder.at(token).hasParameter) {
+
+	vector<shared_ptr<IExpressionNode>> argument = {};
+	const auto validArgumentCount = functionOrder.at(token).validArgumentCount;
+	const bool isParenOmitted = validArgumentCount.size() == 1 && validArgumentCount[0] == 1;
+
+	if (isParenOmitted) {
+		argument.push_back(parseTermExpression());
+	} else if (validArgumentCount.size() > 0) {
 		if (m_tr->is("(")) {
 			m_tr->next("(");
 			argument.push_back(parseExpression());
@@ -927,6 +930,7 @@ shared_ptr<IExpressionNode> Parser::parseFunctionExpression(void)
 			argument.push_back(parseTermExpression());
 		}
 	}
+
 	auto node = make_shared<FunctionExpressionNode>();
 	node->setFunction(token);
 	node->setArgument(argument);
