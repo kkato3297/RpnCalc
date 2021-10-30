@@ -21,6 +21,7 @@ add_executable (RpnCalcTest
 	"RpnCalcTest.cpp"
 	"In2RpnTest.cpp"
 	"${CMAKE_SOURCE_DIR}/src/Common/Exception.cpp"
+	"${CMAKE_SOURCE_DIR}/src/Common/Utility.cpp"
 	"${CMAKE_SOURCE_DIR}/src/In2Rpn/In2Rpn.cpp"
 	"${CMAKE_SOURCE_DIR}/src/In2Rpn/Parser.cpp"
 )

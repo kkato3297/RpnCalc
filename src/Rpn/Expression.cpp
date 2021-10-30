@@ -360,21 +360,28 @@ public:
 	using dist_type = std::uniform_int_distribution<mpz_int>;
 
 	static RandomEngine& getInstance(void) {
-		if (m_instance == nullptr) {
-			m_instance = new RandomEngine();
-		}
-		return *m_instance;
+		static RandomEngine instance;
+		return instance;
 	};
 
 	mpz_int generateRandomInteger(mpz_int a, mpz_int b) {
-		dist_type::param_type param = randomIntDistribution.param();
+		dist_type::param_type param = currentParam;
 
 		if (param.a() != a || param.b() != b) {
 			param = dist_type::param_type(mpz_int(a), mpz_int(b));
+			currentParam = param;
+		}
+
+		param = randomIntDistribution.param();
+		mpz_int nomalized_a = mpz_int(a < 0 ? 0 : a);
+		mpz_int nomalized_b = mpz_int(a < 0 ? b - a : b);
+
+		if (param.a() != nomalized_a || param.b() != nomalized_b) {
+			param = dist_type::param_type(nomalized_a, nomalized_b);
 			randomIntDistribution.param(param);
 		}
 
-		return randomIntDistribution(m_engine);
+		return randomIntDistribution(m_engine) + currentParam.a();
 	};
 
 	mpfr_float generateRandomFloat() {
@@ -385,18 +392,16 @@ private:
 	RandomEngine(void) {
 		std::random_device seed_gen;
 		m_engine = mt19937_64(seed_gen());
+		randomIntDistribution = RandomEngine::dist_type(mpz_int(0), mpz_int(0));
+		currentParam = RandomEngine::dist_type::param_type(mpz_int(0), mpz_int(0));
 	};
 	RandomEngine(const RandomEngine&) = delete;
 
 	std::mt19937_64 m_engine;
 
-	static dist_type randomIntDistribution;
-
-	static RandomEngine* m_instance;
+	dist_type randomIntDistribution;
+	dist_type::param_type currentParam;
 };
-
-RandomEngine* RandomEngine::m_instance = nullptr;
-RandomEngine::dist_type RandomEngine::randomIntDistribution = RandomEngine::dist_type(mpz_int(0), mpz_int(0));
 
 class Expression_Rand : public IExpression {
 public:
