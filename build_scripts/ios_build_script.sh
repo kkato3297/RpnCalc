@@ -93,7 +93,7 @@ function build_ios_gmp() {
 
     local PREFIX=$(realpath "../../dist/gmp/iphoneos")
     local EXTRAS="--target=arm64-apple-darwin -arch arm64 -miphoneos-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_DEVICE_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_DEVICE_PATH} -Wno-error -Wno-implicit-function-declaration"
     if [ ! -e "${PREFIX}" ]; then
         mkdir -p "${PREFIX}"
 
@@ -114,7 +114,7 @@ function build_ios_gmp() {
 
     local PREFIX=$(realpath "../../dist/gmp/iphonesimulator-arm64")
     local EXTRAS="--target=arm64-apple-darwin -arch arm64 -miphonesimulator-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration"
     if [[ ! -e "../../dist/gmp/iphonesimulator" && ! -e "${PREFIX}" ]]; then
         mkdir -p "${PREFIX}"
 
@@ -134,7 +134,7 @@ function build_ios_gmp() {
 
     local PREFIX=$(realpath "../../dist/gmp/iphonesimulator-x86_64")
     local EXTRAS="--target=x86_64-apple-darwin -arch x86_64 -miphonesimulator-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration"
     if [[ ! -e "../../dist/gmp/iphonesimulator" && ! -e "${PREFIX}" ]]; then
         mkdir -p "${PREFIX}"
 
@@ -180,7 +180,7 @@ function build_ios_mpfr() {
 
     local PREFIX=$(realpath "../../dist/mpfr/iphoneos")
     local EXTRAS="--target=arm64-apple-darwin -arch arm64 -miphoneos-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_DEVICE_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_DEVICE_PATH} -Wno-error -Wno-implicit-function-declaration"
     local GMP_LIB_PATH="../../dist/gmp/iphoneos"
     local GMP_PATH="../../dist/gmp/iphoneos"
     if [ ! -e "${PREFIX}" ]; then
@@ -204,7 +204,7 @@ function build_ios_mpfr() {
 
     local PREFIX=$(realpath "../../dist/mpfr/iphonesimulator-arm64")
     local EXTRAS="--target=arm64-apple-darwin -arch arm64 -miphonesimulator-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration"
     local GMP_LIB_PATH="../../dist/gmp/iphonesimulator"
     local GMP_PATH="../../dist/gmp/iphonesimulator"
     if [[ ! -e "../../dist/mpfr/iphonesimulator" && ! -e "${PREFIX}" ]]; then
@@ -227,7 +227,7 @@ function build_ios_mpfr() {
 
     local PREFIX=$(realpath "../../dist/mpfr/iphonesimulator-x86_64")
     local EXTRAS="--target=x86_64-apple-darwin -arch x86_64 -miphonesimulator-version-min=13.0 -no-integrated-as"
-    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration -fvisibility=hidden"
+    local CFLAGS=" ${EXTRAS} ${BITCODE_FLAGS} -isysroot ${SDK_SIMULATOR_PATH} -Wno-error -Wno-implicit-function-declaration"
     local GMP_LIB_PATH="../../dist/gmp/iphonesimulator"
     local GMP_PATH="../../dist/gmp/iphonesimulator"
     if [[ ! -e "../../dist/mpfr/iphonesimulator" && ! -e "${PREFIX}" ]]; then
@@ -286,7 +286,7 @@ function createFramework() {
             SOURCELIBS=${SOURCELIBS}" ${LIB_NAME}"
         done
 
-        ar -rcT "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}" $SOURCELIBS
+        libtool -static -o "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}" ${SOURCELIBS}
     else
         local TMP_SOURCELIBS=""
         local RM_SOURCELIBS=""
@@ -297,35 +297,35 @@ function createFramework() {
             for ARCH in ${ARCHS[@]}; do
                 local TMPFILE="$(basename ${LIB_NAME} | sed -E "s/lib(.+)\.a/\1/g")_${ARCH}"
 
-                lipo ${LIB_NAME} -thin ${ARCH} -output "${TMPDIR}/${TMPFILE}"
+                echo "lipo \"${LIB_NAME}\" -thin ${ARCH} -output \"${TMPDIR}/${TMPFILE}\""
+                lipo -thin ${ARCH} -output "${TMPDIR}/${TMPFILE}" "${LIB_NAME}"
 
                 TMP_SOURCELIBS=${TMP_SOURCELIBS}" ${TMPDIR}/${TMPFILE}"
             done
         done
 
         for ARCH in ${ARCHS[@]}; do
-            ar -rcT "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}_${ARCH}" $(echo ${TMP_SOURCELIBS} | grep "${ARCH}")
+            libtool -static -o "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}_${ARCH}" $(echo ${TMP_SOURCELIBS} | sed -E 's/ /\n/g' | grep "${ARCH}$")
             SOURCELIBS=${SOURCELIBS}" -arch ${ARCH} ${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}_${ARCH}"
             RM_SOURCELIBS=${RM_SOURCELIBS}" ${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}_${ARCH}"
         done
 
         echo "${SOURCELIBS}"
 
-        lipo -create ${SOURCELIBS} \
-            -output "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}"
+        lipo -create -output "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}" ${SOURCELIBS}
 
         rm ${RM_SOURCELIBS}
         rm -rf ${TMPDIR}
     fi
 
 	# Copying headers...
-    cp -R "${FRAMEWORK_PATH}include/"         "${FRAMEWORK_DIR1}/Headers/"
+    cp -R "${FRAMEWORK_PATH}include/"                        "${FRAMEWORK_DIR1}/Headers/"
 
 	# Creating symlinks...
-	ln -fs "$FRAMEWORK_VERSION"                          "$FRAMEWORK_DIR0/Versions/Current"
-	ln -fs "Versions/$FRAMEWORK_VERSION/Headers"         "$FRAMEWORK_DIR0/Headers"
-	ln -fs "Versions/$FRAMEWORK_VERSION/Resources"       "$FRAMEWORK_DIR0/Resources"
-	ln -fs "Versions/$FRAMEWORK_VERSION/$FRAMEWORK_NAME" "$FRAMEWORK_DIR0/$FRAMEWORK_NAME"
+	ln -fs "${FRAMEWORK_VERSION}"                            "${FRAMEWORK_DIR0}/Versions/Current"
+	ln -fs "Versions/${FRAMEWORK_VERSION}/Headers"           "${FRAMEWORK_DIR0}/Headers"
+	ln -fs "Versions/${FRAMEWORK_VERSION}/Resources"         "${FRAMEWORK_DIR0}/Resources"
+	ln -fs "Versions/${FRAMEWORK_VERSION}/${FRAMEWORK_NAME}" "${FRAMEWORK_DIR0}/${FRAMEWORK_NAME}"
 }
 
 function build_xcframework() {

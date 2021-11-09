@@ -38,21 +38,30 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 		set_target_properties(RpnCalc PROPERTIES
 			XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
 		)
+
+		if(${SDK_NAME} STREQUAL "iphoneos")
+			set(FRAMEWORK_TARGET "ios-arm64")
+		elseif(${SDK_NAME} STREQUAL "iphonesimulator")
+			set(FRAMEWORK_TARGET "ios-arm64_x86_64-simulator")
+		else()
+			message(FATAL_ERROR "Unsupported SDK: ${SDK_NAME}")
+		endif()
+
 		target_include_directories(RpnCalc
 			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/boost/${SDK_NAME}/include
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/gmp/${SDK_NAME}/include
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/${SDK_NAME}/include
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/Headers
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/Headers
 		)
 		add_library(GMP::GMP STATIC IMPORTED)
 		add_library(MPFR::MPFR STATIC IMPORTED)
 		set_target_properties(GMP::GMP
 			PROPERTIES
-				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/${SDK_NAME}/lib/libgmp.a
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/GMP
 				OSX_ARCHITECTURES "arm64;x86_64"
 		)
 		set_target_properties(MPFR::MPFR
 			PROPERTIES
-				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/${SDK_NAME}/lib/libmpfr.a
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/MPFR
 				OSX_ARCHITECTURES "arm64;x86_64"
 		)
 		target_link_libraries(RpnCalc GMP::GMP MPFR::MPFR)
