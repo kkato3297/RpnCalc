@@ -34,7 +34,6 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 			PUBLIC_HEADER "iOS/RpnCalc.h"
 			XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 			XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
-			XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*] "arm64"
 		)
 		set_target_properties(RpnCalc PROPERTIES
 			XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
@@ -49,10 +48,12 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 		set_target_properties(GMP::GMP
 			PROPERTIES
 				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/${SDK_NAME}/lib/libgmp.a
+				OSX_ARCHITECTURES "arm64;x86_64"
 		)
 		set_target_properties(MPFR::MPFR
 			PROPERTIES
 				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/${SDK_NAME}/lib/libmpfr.a
+				OSX_ARCHITECTURES "arm64;x86_64"
 		)
 		target_link_libraries(RpnCalc GMP::GMP MPFR::MPFR)
 	endif()
