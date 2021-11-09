@@ -48,12 +48,18 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 		endif()
 
 		target_include_directories(RpnCalc
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/boost/${SDK_NAME}/include
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/boost/Boost.xcframework/${FRAMEWORK_TARGET}/Boost.framework/Headers
 			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/Headers
 			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/Headers
 		)
+		add_library(Boost::Boost STATIC IMPORTED)
 		add_library(GMP::GMP STATIC IMPORTED)
 		add_library(MPFR::MPFR STATIC IMPORTED)
+		set_target_properties(Boost::Boost
+			PROPERTIES
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/boost/Boost.xcframework/${FRAMEWORK_TARGET}/Boost.framework/Boost
+				OSX_ARCHITECTURES "arm64;x86_64"
+		)
 		set_target_properties(GMP::GMP
 			PROPERTIES
 				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/GMP
@@ -64,7 +70,7 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/MPFR
 				OSX_ARCHITECTURES "arm64;x86_64"
 		)
-		target_link_libraries(RpnCalc GMP::GMP MPFR::MPFR)
+		target_link_libraries(RpnCalc Boost::Boost GMP::GMP MPFR::MPFR)
 	endif()
 elseif(${TARGET_FORMAT} STREQUAL "STATIC_LIBRARY")
 	add_library (RpnCalc "RpnCalcLib.cpp" "RpnCalc.h")

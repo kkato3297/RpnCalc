@@ -3,15 +3,17 @@
 function exec_ios_b2() {
     local CXX_ARCH=$1
     local B2_ARCH=$2
-    local SDK_PATH=$3
-    local DEVICE_NAME=$4
+    local DEVICE_NAME=$3
+    local OUTPUT_PATH=$4
     local BUILD_MODE=$5
 
+    local SDK_PATH=$(xcrun --sdk ${DEVICE_NAME} --show-sdk-path)
+
     ./b2 \
-        --build-dir=./build/ios/${DEVICE_NAME} \
-        --stagedir=./stage/ios/${DEVICE_NAME} \
+        --build-dir=./build/ios/${OUTPUT_PATH} \
+        --stagedir=./stage/ios/${OUTPUT_PATH} \
         --prefix=./stage/include \
-        toolset=clang cflags="${CXX_ARCH} -fvisibility=default -miphoneos-version-min=13.0 -isysroot \"${SDK_PATH}\"" \
+        toolset=clang cflags="-arch ${CXX_ARCH} --target=${CXX_ARCH}-apple-darwin -fvisibility=default -m${DEVICE_NAME}-version-min=13.0 -isysroot \"${SDK_PATH}\"" \
         architecture=${B2_ARCH} \
         target-os=iphone \
         link=static \
@@ -26,16 +28,16 @@ function build_ios_boost() {
 
     cd lib/source/boost
 
-    local SDK_DEVICE_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-    local SDK_SIMULATOR_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
-
     # for iphoneos
     if [ ! -e stage/ios/iphoneos ]; then
-        exec_ios_b2 "-arch arm64" "arm" "${SDK_DEVICE_PATH}" "iphoneos" "stage install"
+        exec_ios_b2 "arm64" "arm" "iphoneos" "iphoneos" "stage install"
     fi
     # for iphonesimulator
-    if [ ! -e stage/ios/iphonesimulator ]; then
-        exec_ios_b2 "-arch x86_64 -arch arm64" "arm" "${SDK_SIMULATOR_PATH}" "iphonesimulator" "stage"
+    if [ ! -e stage/ios/iphonesimulator-arm64 ]; then
+        exec_ios_b2 "arm64" "arm" "iphonesimulator" "iphonesimulator-arm64" "stage"
+    fi
+    if [ ! -e stage/ios/iphonesimulator-x86_64 ]; then
+        exec_ios_b2 "x86_64" "x86" "iphonesimulator" "iphonesimulator-x86_64" "stage"
     fi
 
     popd
@@ -50,24 +52,48 @@ function build_ios_boost() {
         mkdir -p lib/dist/boost/iphoneos
     fi
 
-    if [ ! -e lib/dist/boost/iphonesimulator ]; then
-        mkdir -p lib/dist/boost/iphonesimulator
+    if [ ! -e lib/dist/boost/iphoneos/include ]; then
+        cp -R lib/source/boost/stage/include/include lib/dist/boost/iphoneos
     fi
 
     if [ ! -e lib/dist/boost/iphoneos/lib ]; then
         cp -R lib/source/boost/stage/ios/iphoneos/lib lib/dist/boost/iphoneos
     fi
 
-    if [ ! -e lib/dist/boost/iphonesimulator/lib ]; then
-        cp -R lib/source/boost/stage/ios/iphonesimulator/lib lib/dist/boost/iphonesimulator
+    if [ ! -e lib/dist/boost/iphonesimulator-arm64 ]; then
+        mkdir -p lib/dist/boost/iphonesimulator-arm64
     fi
 
-    if [ ! -e lib/dist/boost/iphoneos/include ]; then
-        cp -R lib/source/boost/stage/include/include lib/dist/boost/iphoneos
+    if [ ! -e lib/dist/boost/iphonesimulator-arm64/include ]; then
+        cp -R lib/source/boost/stage/include/include lib/dist/boost/iphonesimulator-arm64
     fi
 
-    if [ ! -e lib/dist/boost/iphonesimulator/include ]; then
-        cp -R lib/source/boost/stage/include/include lib/dist/boost/iphonesimulator
+    if [ ! -e lib/dist/boost/iphonesimulator-arm64/lib ]; then
+        cp -R lib/source/boost/stage/ios/iphonesimulator-arm64/lib lib/dist/boost/iphonesimulator-arm64
+    fi
+
+    if [ ! -e lib/dist/boost/iphonesimulator-x86_64 ]; then
+        mkdir -p lib/dist/boost/iphonesimulator-x86_64
+    fi
+
+    if [ ! -e lib/dist/boost/iphonesimulator-x86_64/include ]; then
+        cp -R lib/source/boost/stage/include/include lib/dist/boost/iphonesimulator-x86_64
+    fi
+
+    if [ ! -e lib/dist/boost/iphonesimulator-x86_64/lib ]; then
+        cp -R lib/source/boost/stage/ios/iphonesimulator-x86_64/lib lib/dist/boost/iphonesimulator-x86_64
+    fi
+
+    if [ ! -e "lib/dist/boost/iphonesimulator" ]; then
+        local SIMULATOR_PATH="lib/dist/boost/iphonesimulator"
+        mkdir -p ${SIMULATOR_PATH}/lib ${SIMULATOR_PATH}/include
+        cp -R ${SIMULATOR_PATH}-arm64/include ${SIMULATOR_PATH}/
+
+        for LIB_NAME in $(cd ${SIMULATOR_PATH}-arm64 && find ./* | grep 'lib.*\.a'); do
+            lipo -create -output ${SIMULATOR_PATH}/${LIB_NAME} \
+                -arch arm64 ${SIMULATOR_PATH}-arm64/${LIB_NAME} \
+                -arch x86_64 ${SIMULATOR_PATH}-x86_64/${LIB_NAME}
+        done
     fi
 
     popd
@@ -104,7 +130,7 @@ function build_ios_gmp() {
             --host=arm64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
 
-        make
+        make -j4
         make install
     fi
 
@@ -124,8 +150,8 @@ function build_ios_gmp() {
             CPPFLAGS="${CFLAGS}" \
             --host=arm64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
-        
-        make
+
+        make -j4
         make install
     fi
 
@@ -144,8 +170,8 @@ function build_ios_gmp() {
             CPPFLAGS="${CFLAGS}" \
             --host=x86_64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
-        
-        make
+
+        make -j4
         make install
     fi
 
@@ -193,8 +219,8 @@ function build_ios_mpfr() {
             --with-gmp=${GMP_LIB_PATH} \
             --host=aarch64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
-        
-        make
+
+        make -j4
         make install
     fi
 
@@ -217,8 +243,8 @@ function build_ios_mpfr() {
             --with-gmp=${GMP_LIB_PATH} \
             --host=aarch64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
-        
-        make
+
+        make -j4
         make install
     fi
 
@@ -240,8 +266,8 @@ function build_ios_mpfr() {
             --with-gmp=${GMP_LIB_PATH} \
             --host=x86_64-apple-darwin \
             --disable-assembly --enable-static --disable-shared --enable-cxx
-        
-        make
+
+        make -j4
         make install
     fi
 
@@ -261,12 +287,14 @@ function build_ios_mpfr() {
 # $1:framework name
 # $2:framework version
 # $3:framework path
+# $4:arch list
 #
-function createFramework() {
+function create_framework() {
     local FRAMEWORK_NAME=$1
 	local FRAMEWORK_VERSION=$2
 	local FRAMEWORK_PATH=$3
     local ARCHS=($4)
+
 	local FRAMEWORK_DIR0="${FRAMEWORK_PATH}${FRAMEWORK_NAME}.framework"
 	local FRAMEWORK_DIR1="${FRAMEWORK_DIR0}/Versions/${FRAMEWORK_VERSION}"
 
@@ -287,7 +315,7 @@ function createFramework() {
         done
 
         libtool -static -o "${FRAMEWORK_DIR1}/${FRAMEWORK_NAME}" ${SOURCELIBS}
-    else
+    elif [ ${#ARCHS[@]} -gt 1 ]; then
         local TMP_SOURCELIBS=""
         local RM_SOURCELIBS=""
         local TMPDIR="${FRAMEWORK_PATH}.tmp"
@@ -316,6 +344,8 @@ function createFramework() {
 
         rm ${RM_SOURCELIBS}
         rm -rf ${TMPDIR}
+    else
+        echo "Error: ARCHS is empty"
     fi
 
 	# Copying headers...
@@ -341,12 +371,21 @@ function build_xcframework() {
     local OPTIONS=""
     local XCFRAMEWORK_NAME=""
     case $LIB_NAME in
+        boost)
+            XCFRAMEWORK_NAME="Boost"
+            local FRAMEWORK_NAME="${XCFRAMEWORK_NAME}"
+
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphoneos/" "${IOS_ARCHS[*]}"
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphonesimulator/" "${IOS_SIMULATOR_ARCHS[*]}"
+            OPTIONS+=" -framework ./iphoneos/${FRAMEWORK_NAME}.framework"
+            OPTIONS+=" -framework ./iphonesimulator/${FRAMEWORK_NAME}.framework"
+            ;;
         gmp)
             XCFRAMEWORK_NAME="GMP"
             local FRAMEWORK_NAME="${XCFRAMEWORK_NAME}"
 
-            createFramework "${FRAMEWORK_NAME}" "A" "./iphoneos/" "${IOS_ARCHS[*]}"
-            createFramework "${FRAMEWORK_NAME}" "A" "./iphonesimulator/" "${IOS_SIMULATOR_ARCHS[*]}"
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphoneos/" "${IOS_ARCHS[*]}"
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphonesimulator/" "${IOS_SIMULATOR_ARCHS[*]}"
             OPTIONS+=" -framework ./iphoneos/${FRAMEWORK_NAME}.framework"
             OPTIONS+=" -framework ./iphonesimulator/${FRAMEWORK_NAME}.framework"
             ;;
@@ -354,8 +393,8 @@ function build_xcframework() {
             XCFRAMEWORK_NAME="MPFR"
             local FRAMEWORK_NAME="${XCFRAMEWORK_NAME}"
 
-            createFramework "${FRAMEWORK_NAME}" "A" "./iphoneos/" "${IOS_ARCHS[*]}"
-            createFramework "${FRAMEWORK_NAME}" "A" "./iphonesimulator/" "${IOS_SIMULATOR_ARCHS[*]}"
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphoneos/" "${IOS_ARCHS[*]}"
+            create_framework "${FRAMEWORK_NAME}" "A" "./iphonesimulator/" "${IOS_SIMULATOR_ARCHS[*]}"
             OPTIONS+=" -framework ./iphoneos/${FRAMEWORK_NAME}.framework"
             OPTIONS+=" -framework ./iphonesimulator/${FRAMEWORK_NAME}.framework"
             ;;
@@ -383,6 +422,7 @@ function rpncalc_ios_build() {
     build_ios_gmp
     build_ios_mpfr
 
+    build_xcframework "boost"
     build_xcframework "gmp"
     build_xcframework "mpfr"
 }
