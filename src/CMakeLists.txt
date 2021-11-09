@@ -34,27 +34,43 @@ elseif(${TARGET_FORMAT} STREQUAL "SHARED_LIBRARY")
 			PUBLIC_HEADER "iOS/RpnCalc.h"
 			XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
 			XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
-			XCODE_ATTRIBUTE_EXCLUDED_ARCHS[sdk=iphonesimulator*] "arm64"
 		)
 		set_target_properties(RpnCalc PROPERTIES
 			XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
 		)
+
+		if(${SDK_NAME} STREQUAL "iphoneos")
+			set(FRAMEWORK_TARGET "ios-arm64")
+		elseif(${SDK_NAME} STREQUAL "iphonesimulator")
+			set(FRAMEWORK_TARGET "ios-arm64_x86_64-simulator")
+		else()
+			message(FATAL_ERROR "Unsupported SDK: ${SDK_NAME}")
+		endif()
+
 		target_include_directories(RpnCalc
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/boost/${SDK_NAME}/include
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/gmp/${SDK_NAME}/include
-			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/${SDK_NAME}/include
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/boost/Boost.xcframework/${FRAMEWORK_TARGET}/Boost.framework/Headers
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/Headers
+			PRIVATE ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/Headers
 		)
+		add_library(Boost::Boost STATIC IMPORTED)
 		add_library(GMP::GMP STATIC IMPORTED)
 		add_library(MPFR::MPFR STATIC IMPORTED)
+		set_target_properties(Boost::Boost
+			PROPERTIES
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/boost/Boost.xcframework/${FRAMEWORK_TARGET}/Boost.framework/Boost
+				OSX_ARCHITECTURES "arm64;x86_64"
+		)
 		set_target_properties(GMP::GMP
 			PROPERTIES
-				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/${SDK_NAME}/lib/libgmp.a
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/gmp/GMP.xcframework/${FRAMEWORK_TARGET}/GMP.framework/GMP
+				OSX_ARCHITECTURES "arm64;x86_64"
 		)
 		set_target_properties(MPFR::MPFR
 			PROPERTIES
-				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/${SDK_NAME}/lib/libmpfr.a
+				IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/dist/mpfr/MPFR.xcframework/${FRAMEWORK_TARGET}/MPFR.framework/MPFR
+				OSX_ARCHITECTURES "arm64;x86_64"
 		)
-		target_link_libraries(RpnCalc GMP::GMP MPFR::MPFR)
+		target_link_libraries(RpnCalc Boost::Boost GMP::GMP MPFR::MPFR)
 	endif()
 elseif(${TARGET_FORMAT} STREQUAL "STATIC_LIBRARY")
 	add_library (RpnCalc "RpnCalcLib.cpp" "RpnCalc.h")
